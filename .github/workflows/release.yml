@@ -99,9 +99,9 @@ jobs:
       - name: Rename packages
         id: rename-packages
         run: |
-          mv ${{ steps.identify-package.outputs.chrome_package }} ./chrome-${{ inputs.tag }}.zip || true
-          mv ${{ steps.identify-package.outputs.firefox_package }} ./firefox-${{ inputs.tag }}.zip || true
-          mv ${{ steps.identify-package.outputs.edge_package }} ./edge-${{ inputs.tag }}.zip || true
+          mv ${{ steps.identify-package.outputs.chrome_package }} ./chrome-${{ inputs.tag }}.zip
+          mv ${{ steps.identify-package.outputs.firefox_package }} ./firefox-${{ inputs.tag }}.zip
+          mv ${{ steps.identify-package.outputs.edge_package }} ./edge-${{ inputs.tag }}.zip
 
       - name: Create release
         id: create-release
@@ -111,7 +111,7 @@ jobs:
           ls -la
           ls -la -- */
           gh release create ${{ inputs.tag }} \
-            chrome-${{ inputs.tag }}.zip firefox-${{ inputs.tag }}.zip edge-${{ inputs.tag }}.zip \
+            chrome-${{ inputs.tag }}.zip \
             --repo="$GITHUB_REPOSITORY" \
             --title=v${{ inputs.tag }} \
             --target=${{ inputs.target_commit }} \
