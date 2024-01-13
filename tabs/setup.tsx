@@ -16,16 +16,7 @@ export default () => {
       <Container sx={{ display: "flex", height: "100vh", flexDirection: "column", justifyContent: "center" }}>
         <Paper sx={{ overflow: "hidden" }}>
           <Grid container minHeight={200}>
-            <Grid item xs={12} sm={6}>
-              <FluffyBackground
-                p={4}
-                display="flex"
-                alignItems="center"
-              >
-                <Typography variant="h3">Welcome to FluffyFi</Typography>
-              </FluffyBackground>
-            </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12}>
               <Box p={4}>
                 <List>
                   <>
@@ -33,7 +24,7 @@ export default () => {
                       <ListItemIcon>
                         <CheckCircle color="success" />
                       </ListItemIcon>
-                      <ListItemText primary="Add QiSpace PPK Util to Chrome"></ListItemText>
+                      <ListItemText primary="Add FluffiFi to Chrome"></ListItemText>
                     </ListItem>
                   </>
                   <Divider />
@@ -41,7 +32,7 @@ export default () => {
                     <ListItem>
                       <ListItemIcon>
                         {
-                          [SetupSteps.QISPACE_CONNECT, SetupSteps.EXTENSION_PINNING, SetupSteps.COMPLETED].includes(currentStep) 
+                          [, SetupSteps.EXTENSION_PINNING, SetupSteps.COMPLETED].includes(currentStep) 
                             ? <CheckCircle color="success" /> 
                             : <RadioButtonUncheckedIcon />
                         }
@@ -51,7 +42,7 @@ export default () => {
                     <Collapse unmountOnExit in={currentStep === SetupSteps.PIN_SETUP}>
                       <Box display="flex" flexDirection="column" p={2} pt={0}>
                         <Typography sx={{ mb: 2 }}>A PIN is required to protect your data. Please enter a PIN of choice below.</Typography>
-                        <PasswordSetterForm onComplete={() => setCurrentStep(SetupSteps.QISPACE_CONNECT)}/>
+                        <PasswordSetterForm onComplete={() => setCurrentStep(SetupSteps.EXTENSION_PINNING)}/>
                       </Box>
                     </Collapse>
                   </>
@@ -65,7 +56,7 @@ export default () => {
                             : <RadioButtonUncheckedIcon />
                         }
                       </ListItemIcon>
-                      <ListItemText primary="Keep QiSpace PPK Util in easy reach"></ListItemText>
+                      <ListItemText primary="Keep FluffyFi in easy reach"></ListItemText>
                     </ListItem>
                     <Collapse unmountOnExit in={currentStep === SetupSteps.EXTENSION_PINNING}>
                       <Box display="flex" flexDirection="column" p={2} pt={0}>
@@ -76,7 +67,7 @@ export default () => {
                   </>
                   <Collapse unmountOnExit in={currentStep === SetupSteps.COMPLETED}>
                     <Box display="flex" flexDirection="column" mt={5}>
-                      <Typography>Your QiSpace PPK Util is ready for use. You may now close this setup.</Typography>
+                      <Typography>FluffyFi is ready for use. You may now close this setup.</Typography>
                       <Button autoFocus sx={{ mt: 1 }} size="small" variant="contained" onClick={() => window.close()}>Close setup</Button>
                     </Box>
                   </Collapse>
