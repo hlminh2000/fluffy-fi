@@ -15,7 +15,7 @@ on:
 jobs:
   publish_to_stores:
     name: Publish to ${{ matrix.stores }} store
-    runs-on: ott-ubuntu-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix: 
         stores:
@@ -71,7 +71,7 @@ jobs:
   
   create_release:
     name: Create Release ${{ inputs.tag }}
-    runs-on: ott-ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Download artifact from commit
         id: download-packages

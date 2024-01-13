@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     name: "Build and push artifact"
-    runs-on: ott-ubuntu-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         target: ["firefox-mv2", "chrome-mv3", "edge-mv3"]
