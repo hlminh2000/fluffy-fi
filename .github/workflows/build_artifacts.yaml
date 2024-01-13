@@ -1,0 +1,58 @@
+name: "Build artifact"
+on:
+  workflow_call:
+    inputs:
+      is_publishable_package:
+        type: boolean
+        default: false
+        description: Whether the package is a potential candidate for publishing
+
+jobs:
+  build:
+    name: "Build and push artifact"
+    runs-on: ott-ubuntu-latest
+    strategy:
+      matrix:
+        target: ["firefox-mv2", "chrome-mv3", "edge-mv3"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache pnpm modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 8.12.1
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build a debuggable package
+        if: ${{ !inputs.is_publishable_package }}
+        run: pnpm build --target=${{matrix.target}} --source-maps --bundle-buddy --no-minify --tag=debug-${{github.sha}} -- --zip
+
+      - name: Build a publishable package
+        if: ${{ inputs.is_publishable_package }}
+        run: pnpm build --target=${{matrix.target}} --tag=prod-${{github.sha}} -- --zip
+
+      - name: Upload debuggable artifact
+        if: ${{ !inputs.is_publishable_package }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{matrix.target}}
+          path: build/${{matrix.target}}-debug-${{github.sha}}.zip
+
+      - name: Upload publishable artifact
+        if: ${{ inputs.is_publishable_package }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{matrix.target}}
+          path: build/${{matrix.target}}-prod-${{github.sha}}.zip

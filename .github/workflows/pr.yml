@@ -1,0 +1,8 @@
+name: "Build debug package"
+on:
+  pull_request: 
+
+jobs:
+  test_build:
+    name: "Test build"
+    uses: ./.github/workflows/build_artifacts.yaml

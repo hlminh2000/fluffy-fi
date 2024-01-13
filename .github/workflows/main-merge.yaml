@@ -1,0 +1,11 @@
+name: "Build production package"
+on:
+  push:
+    branches: main 
+
+jobs:
+  build:
+    name: "Build artifacts"
+    uses: ./.github/workflows/build_artifacts.yaml
+    with:
+      is_publishable_package: true
