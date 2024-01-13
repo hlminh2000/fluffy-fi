@@ -1,9 +1,9 @@
 {
-  "name": "keygen-browser-extension",
-  "displayName": "Keygen browser extension",
+  "name": "fluffy-fi",
+  "displayName": "FluffyFi",
   "version": "0.0.1",
-  "description": "Quantum-secure key generation",
-  "author": "Quantropi Inc.",
+  "description": "The app to fluff up your personal finance",
+  "author": "Minhified",
   "scripts": {
     "dev": "plasmo dev --verbose",
     "dev-ff": "plasmo dev --target=firefox-mv2 --verbose",

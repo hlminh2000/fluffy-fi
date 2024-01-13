@@ -19,8 +19,8 @@ jobs:
     strategy:
       matrix: 
         stores:
-          - no
-          # - Chrome
+          # - no
+          - Chrome
           # - Firefox
           # - Edge
     steps:
