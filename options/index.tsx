@@ -24,15 +24,18 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PasswordIcon from '@mui/icons-material/Password';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import { useSnackbarState } from "~common/components/CopyButton";
-import { PasswordValidator } from "~common/components/PasswordValidator";
 import { FluffyThemeProvider } from "~common/utils/theme";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import { useLoginSession } from "~common/utils/useLoginSession";
 import { useStorage } from "@plasmohq/storage/hook";
 import { COLOR_THEME, DEFAULT_SESSION_TIMEOUT_MINUTES, STORAGE_KEY } from "~common/utils/constants";
 import { useColorThemeSetting } from "~common/utils/settingsHooks";
 import { SecretInput } from "~common/components/SecretInput";
 import { FluffyBackground } from "~common/components/FluffyBackground";
+import { LoginGate } from "~common/components/LoginGate";
+import { PlaidConnection } from "~common/components/PlaidConnection";
+import HubIcon from '@mui/icons-material/Hub';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import { usePlaidItems } from "~common/utils/usePlaidItems";
 
 const ChangePassword = () => {
 
@@ -45,13 +48,13 @@ const ChangePassword = () => {
   return (
     <List disablePadding>
       <ListItem sx={{ pl: 10 }}>
-        <SecretInput fullWidth size="small" label="Current password"/>
+        <SecretInput fullWidth size="small" label="Current password" />
       </ListItem>
       <ListItem sx={{ pl: 10 }}>
-        <SecretInput fullWidth size="small" label="New password"/>
+        <SecretInput fullWidth size="small" label="New password" />
       </ListItem>
       <ListItem sx={{ pl: 10 }}>
-        <SecretInput fullWidth size="small" label="Confirm password"/>
+        <SecretInput fullWidth size="small" label="Confirm password" />
       </ListItem>
       <ListItem sx={{ pl: 10 }}>
         <Button fullWidth variant="contained" disabled={loading} onClick={onPasswordChangeClick}>Change Password</Button>
@@ -109,10 +112,66 @@ const SecuritySettings = () => {
   )
 }
 
+const BankConnections = () => {
+  const { plaidItems } = usePlaidItems();
+  return (
+    <Box>
+      <pre>{JSON.stringify(plaidItems, null, 2)}</pre>
+    </Box>
+  )
+}
+
+const PlaidSettings = () => {
+
+  const snackbarState = useSnackbarState();
+  const { snackbarMessage, snackbarOpen, messageType } = snackbarState;
+
+  const [plaidConnectionOpen, setPlaidConnectionOpen] = useState(false)
+  const [bankConnectionsOpen, setBankConnectionsOpen] = useState(false)
+  return (
+    <Card>
+      <CardHeader title="Connections" />
+      <Divider />
+      <CardContent>
+        <List>
+          <ListItemButton onClick={() => setPlaidConnectionOpen(!plaidConnectionOpen)}>
+            <ListItemIcon >
+              <HubIcon color="primary" />
+            </ListItemIcon>
+            <ListItemText primary="Plaid connection" secondary="Plaid provides FluffyFi with connections to your financial institutions" />
+            {plaidConnectionOpen ? <ExpandLess /> : <ExpandMore />}
+          </ListItemButton>
+          <Collapse in={plaidConnectionOpen} timeout="auto" unmountOnExit>
+            <Box display="flex" flexDirection="column" pl={10} pr={2}>
+              <PlaidConnection onComplete={console.log} />
+            </Box>
+          </Collapse>
+
+          <Divider variant="inset" sx={{ my: 2 }} />
+
+          <ListItemButton onClick={() => setBankConnectionsOpen(!bankConnectionsOpen)}>
+            <ListItemIcon >
+              <AccountBalanceIcon color="primary" />
+            </ListItemIcon>
+            <ListItemText primary="Institution connections" secondary="Your connected bank accounts" />
+            {bankConnectionsOpen ? <ExpandLess /> : <ExpandMore />}
+          </ListItemButton>
+          <Collapse in={bankConnectionsOpen} timeout="auto" unmountOnExit>
+            <Box display="flex" flexDirection="column" pl={10} pr={2}>
+              <BankConnections />
+            </Box>
+          </Collapse>
+
+        </List>
+      </CardContent>
+    </Card>
+  )
+}
+
 
 const AppearanceSettings = () => {
   const { colorTheme, options, setColorTheme } = useColorThemeSetting()
-  const onColorThemeChange: React.ComponentProps<typeof Select>['onChange'] = 
+  const onColorThemeChange: React.ComponentProps<typeof Select>['onChange'] =
     (e) => setColorTheme(e.target.value as COLOR_THEME)
   return (
     <Card>
@@ -142,34 +201,32 @@ function IndexPopup() {
   const snackbarState = useSnackbarState();
   const { snackbarMessage, snackbarOpen, messageType } = snackbarState;
 
-  const { cachedPassword } = useLoginSession();
-
-  if (!cachedPassword) return (
-    <FluffyThemeProvider>
-      <PasswordValidator />
-    </FluffyThemeProvider>
-  )
   return (
     <FluffyThemeProvider>
-      <FluffyBackground sx={{
-        height: "100vh",
-        overflowY: "scroll",
-      }}>
-        <GlobalStyles styles={{ body: { margin: 0 } }} />
-        <Snackbar open={snackbarOpen} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
-          <Alert severity={messageType} >{snackbarMessage}</Alert>
-        </Snackbar>
-        <Box sx={{ flexGrow: 1 }} p={0}>
-          <Container sx={{ py: 8, minHeight: "100vh" }}>
-            <Box mt={2}>
-              <SecuritySettings />
-            </Box>
-            <Box mt={2}>
-              <AppearanceSettings />
-            </Box>
-          </Container>
-        </Box>
-      </FluffyBackground>
+      <LoginGate>
+        <FluffyBackground sx={{
+          height: "100vh",
+          overflowY: "scroll",
+        }}>
+          <GlobalStyles styles={{ body: { margin: 0 } }} />
+          <Snackbar open={snackbarOpen} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
+            <Alert severity={messageType} >{snackbarMessage}</Alert>
+          </Snackbar>
+          <Box sx={{ flexGrow: 1 }} p={0}>
+            <Container sx={{ py: 8, minHeight: "100vh" }}>
+              <Box mt={2}>
+                <PlaidSettings />
+              </Box>
+              <Box mt={2}>
+                <SecuritySettings />
+              </Box>
+              <Box mt={2}>
+                <AppearanceSettings />
+              </Box>
+            </Container>
+          </Box>
+        </FluffyBackground>
+      </LoginGate>
     </FluffyThemeProvider>
   )
 }

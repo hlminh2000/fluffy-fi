@@ -8,22 +8,7 @@ import { SetupSteps, useSetupStep } from "~common/utils/useSetupStep"
 import { PlaidConnection, usePlaidConnection } from "~common/components/PlaidConnection";
 import { useAsync } from 'react-async-hook';
 import {  useEffect,  useState } from "react";
-import { useStorageVault } from "~common/utils/useStorageVault";
-import { STORAGE_KEY } from "~common/utils/constants";
-
-type PlaidItem = {
-  "access_token": string,
-  "item_id": string,
-  "request_id": string
-}
-const usePlaidItems = () => {
-  const [plaidItems, setPlaidItems] = useStorageVault<PlaidItem[]>(STORAGE_KEY.plaidItems);
-  const plaidItemsFallback = plaidItems || []
-  return {
-    plaidItems: plaidItemsFallback,
-    addPlaidItem: (item: PlaidItem) => setPlaidItems([...plaidItemsFallback, item]),
-  }
-}
+import { usePlaidItems, type PlaidItem } from "~common/utils/usePlaidItems";
 
 const PlaidLink = ({onComplete}: {onComplete: () => any}) => {
 
@@ -54,7 +39,6 @@ const PlaidLink = ({onComplete}: {onComplete: () => any}) => {
   })).json(), [plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"]])
   
   type IframeMessage = { type: "PLAID_OPEN" } | { type: "PLAID_EXIT" } | { type: "PLAID_CONNECT_SUCCESS", payload: {public_token: string, metadata: {}} }
-  const [iframeRef, setIframeRef] = useState<HTMLIFrameElement>(null)
   useEffect(() => {
     const messageHandler = async (e: MessageEvent<IframeMessage>) => {
       if (e.data.type === "PLAID_OPEN") return setIframeExpanded(true)
@@ -65,7 +49,7 @@ const PlaidLink = ({onComplete}: {onComplete: () => any}) => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            clientId: plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"],
+            client_id: plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"],
             secret: plaidConnection?.baseOptions?.headers?.["PLAID-SECRET"],
             public_token: payload.public_token
           })
@@ -78,7 +62,7 @@ const PlaidLink = ({onComplete}: {onComplete: () => any}) => {
     return () => {
       window.removeEventListener("message", messageHandler)
     }
-  }, [])
+  }, [plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"], plaidConnection?.baseOptions?.headers?.["PLAID-SECRET"]])
 
   return (
     <Box>
@@ -86,7 +70,6 @@ const PlaidLink = ({onComplete}: {onComplete: () => any}) => {
       {result?.link_token && (
         <Box mt={2}>
           <iframe
-            ref={setIframeRef}
             src={`http://localhost:3001?plaidLinkToken=${result.link_token}`}
             style={{ width: "100%", border: "none", height: !iframeExpanded ? 32 : 660 }}
           />

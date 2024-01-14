@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useStorageVault } from "~common/utils/useStorageVault";
 import * as yup from 'yup'
 import { SecretInput } from "./SecretInput";
@@ -24,11 +24,16 @@ export const usePlaidConnection = () => {
 }
 
 export const PlaidConnection = ({ onComplete }: { onComplete: () => any }) => {
-  const [clientIdInput, setClientIdInput] = useState("");
-  const [clientSecretInput, setClientSecretInput] = useState("");
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { setPlaidConnection } = usePlaidConnection();
+  const { plaidConnection, setPlaidConnection } = usePlaidConnection();
+  const [clientIdInput, setClientIdInput] = useState("");
+  const [clientSecretInput, setClientSecretInput] = useState("");
+
+  useEffect(() => {
+    setClientIdInput(plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"] || "")
+    setClientSecretInput(plaidConnection?.baseOptions?.headers?.["PLAID-SECRET"] || "")
+  }, [plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"], plaidConnection?.baseOptions?.headers?.["PLAID-SECRET"]])
 
   const onConnectClick = async () => {
     setIsLoading(true)
