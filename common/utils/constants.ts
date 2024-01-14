@@ -4,7 +4,9 @@ export enum STORAGE_KEY {
   lastLoginTime = "lastLoginTime",
   sessionTimeoutMinutes = 'sessionTimeoutMinutes',
   colorTheme = "colorTheme",
-  currentSetupStep = "currentSetupStep"
+  currentSetupStep = "currentSetupStep",
+  plaidConnection = "plaidConnection",
+  plaidItems = "plaidItems",
 }
 
 export enum COLOR_THEME {

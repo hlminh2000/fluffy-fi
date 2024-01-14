@@ -9,6 +9,7 @@ import { PlaidConnection, usePlaidConnection } from "~common/components/PlaidCon
 import { useAsync } from 'react-async-hook';
 import {  useEffect,  useState } from "react";
 import { useStorageVault } from "~common/utils/useStorageVault";
+import { STORAGE_KEY } from "~common/utils/constants";
 
 type PlaidItem = {
   "access_token": string,
@@ -16,7 +17,7 @@ type PlaidItem = {
   "request_id": string
 }
 const usePlaidItems = () => {
-  const [plaidItems, setPlaidItems] = useStorageVault<PlaidItem[]>("plaidItems");
+  const [plaidItems, setPlaidItems] = useStorageVault<PlaidItem[]>(STORAGE_KEY.plaidItems);
   const plaidItemsFallback = plaidItems || []
   return {
     plaidItems: plaidItemsFallback,

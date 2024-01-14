@@ -3,6 +3,7 @@ import { useStorageVault } from "~common/utils/useStorageVault";
 import * as yup from 'yup'
 import { SecretInput } from "./SecretInput";
 import { Box, Button, Link } from "@mui/material";
+import { STORAGE_KEY } from "~common/utils/constants";
 
 export const usePlaidConnection = () => {
   const [plaidConnection, setPlaidConnection] = useStorageVault<{
@@ -15,7 +16,7 @@ export const usePlaidConnection = () => {
         "Content-Type": "application/json"
       },
     },
-  }>("plaidConnection");
+  }>(STORAGE_KEY.plaidConnection);
   return {
     plaidConnection,
     setPlaidConnection
@@ -27,7 +28,7 @@ export const PlaidConnection = ({ onComplete }: { onComplete: () => any }) => {
   const [clientSecretInput, setClientSecretInput] = useState("");
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const {plaidConnection, setPlaidConnection} = usePlaidConnection();
+  const { setPlaidConnection } = usePlaidConnection();
 
   const onConnectClick = async () => {
     setIsLoading(true)
