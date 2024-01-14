@@ -1,6 +1,6 @@
 import { Storage } from "@plasmohq/storage"
 import Queue from 'promise-queue';
-import { passwordCache } from "~background";
+import { passwordCache } from "~background/passwordCache";
 
 export const storageVault = (() => {
   enum EncryptionAlgo {

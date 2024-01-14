@@ -1,5 +1,6 @@
 import { Storage } from "@plasmohq/storage"
 import { DEFAULT_SESSION_TIMEOUT_MINUTES, STORAGE_KEY } from "~common/utils/constants";
+import { openSetupPage } from "./utils";
 
 chrome.webRequest.onBeforeRequest.addListener(
   (async (requestDetails) => {
@@ -21,13 +22,6 @@ chrome.runtime.onInstalled.addListener(function (object) {
     openSetupPage()
   }
 });
-
-export const openSetupPage = () => {
-  const setupPage = "/tabs/setup.html";
-  chrome.tabs.create({ url: setupPage }, function (tab) {
-    console.log("Opened new setup page");
-  });
-}
 
 export const passwordCache = (() => {
   let _password: string | null = null
