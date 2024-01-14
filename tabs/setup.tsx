@@ -6,17 +6,31 @@ import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import { PasswordSetterForm } from "~common/components/PasswordSetter"
 import { SetupSteps, useSetupStep } from "~common/utils/useSetupStep"
 import { PlaidConnection, usePlaidConnection } from "~common/components/PlaidConnection";
-// import { usePlaidLink } from 'react-plaid-link';
 import { useAsync } from 'react-async-hook';
-import { useEffect } from "react";
+import {  useEffect,  useState } from "react";
+import { useStorageVault } from "~common/utils/useStorageVault";
 
-const PlaidLink = () => {
+type PlaidItem = {
+  "access_token": string,
+  "item_id": string,
+  "request_id": string
+}
+const usePlaidItems = () => {
+  const [plaidItems, setPlaidItems] = useStorageVault<PlaidItem[]>("plaidItems");
+  const plaidItemsFallback = plaidItems || []
+  return {
+    plaidItems: plaidItemsFallback,
+    addPlaidItem: (item: PlaidItem) => setPlaidItems([...plaidItemsFallback, item]),
+  }
+}
+
+const PlaidLink = ({onComplete}: {onComplete: () => any}) => {
 
   const { plaidConnection } = usePlaidConnection()
+  const [iframeExpanded, setIframeExpanded] = useState(false);
+  const { addPlaidItem } = usePlaidItems();
 
-  console.log("plaidConnection: ", plaidConnection)
-
-  const { result } = useAsync(async () => (await fetch("https://development.plaid.com/link/token/create", {
+  const { result } = useAsync(async () => (await fetch("https://sandbox.plaid.com/link/token/create", {
     method: "POST",
     headers: {
       ...(plaidConnection?.baseOptions?.headers || {}),
@@ -37,13 +51,33 @@ const PlaidLink = () => {
       "redirect_uri": "https://local.fluffyfi/"
     })
   })).json(), [plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"]])
-
-  // const { open, ready } = usePlaidLink({
-  //   token: result?.link_token,
-  //   onSuccess: (public_token, metadata) => {
-  //     // send public_token to server
-  //   },
-  // });
+  
+  type IframeMessage = { type: "PLAID_OPEN" } | { type: "PLAID_EXIT" } | { type: "PLAID_CONNECT_SUCCESS", payload: {public_token: string, metadata: {}} }
+  const [iframeRef, setIframeRef] = useState<HTMLIFrameElement>(null)
+  useEffect(() => {
+    const messageHandler = async (e: MessageEvent<IframeMessage>) => {
+      if (e.data.type === "PLAID_OPEN") return setIframeExpanded(true)
+      if (e.data.type === "PLAID_EXIT") return setIframeExpanded(false)
+      if (e.data.type === "PLAID_CONNECT_SUCCESS") {
+        const { payload } = e.data
+        const plaidItem = (await fetch("https://sandbox.plaid.com/item/public_token/exchange", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientId: plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"],
+            secret: plaidConnection?.baseOptions?.headers?.["PLAID-SECRET"],
+            public_token: payload.public_token
+          })
+        }).then(res => res.json())) as PlaidItem
+        await addPlaidItem(plaidItem)
+        onComplete()
+      }
+    }
+    window.addEventListener("message", messageHandler)
+    return () => {
+      window.removeEventListener("message", messageHandler)
+    }
+  }, [])
 
   return (
     <Box>
@@ -51,8 +85,9 @@ const PlaidLink = () => {
       {result?.link_token && (
         <Box mt={2}>
           <iframe
+            ref={setIframeRef}
             src={`http://localhost:3001?plaidLinkToken=${result.link_token}`}
-            style={{ width: "100%", border: "none", height: 32 }}
+            style={{ width: "100%", border: "none", height: !iframeExpanded ? 32 : 660 }}
           />
         </Box>
       )}
@@ -120,7 +155,7 @@ export default () => {
                   </ListItem>
                   <Collapse unmountOnExit in={currentStep === SetupSteps.INSTITUTION_CONNECTION}>
                     <Box display="flex" flexDirection="column" p={2} pt={0}>
-                      <PlaidLink />
+                      <PlaidLink onComplete={() => setCurrentStep(SetupSteps.COMPLETED)}/>
                     </Box>
                   </Collapse>
                   <Collapse unmountOnExit in={currentStep === SetupSteps.COMPLETED}>

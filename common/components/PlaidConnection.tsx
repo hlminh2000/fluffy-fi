@@ -6,7 +6,7 @@ import { Box, Button, Link } from "@mui/material";
 
 export const usePlaidConnection = () => {
   const [plaidConnection, setPlaidConnection] = useStorageVault<{
-    basePath: "development",
+    basePath: "sandbox" | "development" | "production",
     baseOptions: {
       headers: {
         'PLAID-CLIENT-ID': string,
@@ -39,7 +39,7 @@ export const PlaidConnection = ({ onComplete }: { onComplete: () => any }) => {
         clientId: clientIdInput,
         clientSecret: clientSecretInput
       })
-      await (fetch("https://development.plaid.com/categories/get", {
+      await (fetch("https://sandbox.plaid.com/categories/get", {
         method: "POST",
         headers: {
           'PLAID-CLIENT-ID': clientId,
@@ -49,7 +49,7 @@ export const PlaidConnection = ({ onComplete }: { onComplete: () => any }) => {
         body: JSON.stringify({})
       })).then(res => res.json())
       await setPlaidConnection({
-        basePath: "development",
+        basePath: "sandbox",
         baseOptions: {
           headers: {
             "PLAID-CLIENT-ID": clientId,
