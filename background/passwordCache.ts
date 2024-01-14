@@ -1,3 +1,4 @@
+import { Storage } from "@plasmohq/storage";
 import { DEFAULT_SESSION_TIMEOUT_MINUTES, STORAGE_KEY } from "~common/utils/constants";
 
 export const passwordCache = (() => {
