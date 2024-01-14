@@ -3,7 +3,8 @@ import { useStorage } from "@plasmohq/storage/hook"
 import { STORAGE_KEY } from "~common/utils/constants"
 
 export enum SetupSteps {
-  EXTENSION_PINNING = "EXTENSION_PINNING",
+  PLAID_CONNECTION = "PLAID_CONNECTION",
+  INSTITUTION_CONNECTION = "INSTITUTION_CONNECTION",
   PIN_SETUP = "PIN_SETUP",
   COMPLETED = "COMPLETED",
 }

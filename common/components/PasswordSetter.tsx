@@ -9,9 +9,12 @@ import {
 import { usePasswordHash } from "~common/utils/usePasswordHash";
 import { SecretInput } from "./SecretInput";
 import { FluffyBackground } from "./FluffyBackground";
+import { useLoginSession } from "~common/utils/useLoginSession";
 
 export const PasswordSetterForm = ({ onComplete }: { onComplete?: () => void }) => {
   const { hashPassword } = usePasswordHash();
+  const { login } = useLoginSession();
+
   const [newPasswordInput, setNewPasswordInput] = useState("")
   const [newPasswordInputConfirm, setNewPasswordInputConfirm] = useState("")
   const [newPasswordError, setNewPasswordError] = useState(false);
@@ -26,6 +29,8 @@ export const PasswordSetterForm = ({ onComplete }: { onComplete?: () => void }) 
   const onSetPasswordClick = async () => {
     if (newPasswordInput && newPasswordInputConfirm && newPasswordInput === newPasswordInputConfirm) {
       await hashPassword({ password: newPasswordInput })
+      await new Promise(res => setTimeout(res, 1000))
+      await login(newPasswordInput)
       onComplete?.()
     } else {
       setNewPasswordError(true)

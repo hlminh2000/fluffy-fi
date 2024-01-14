@@ -4,7 +4,7 @@ import { Storage } from "@plasmohq/storage"
 
 export const usePasswordHash = () => {
   type SupportedAlgo = "SHA-256"
-
+  
   const [storedHash, setPasswordHash] = useStorage<{
     hash: null | number[],
     algo: SupportedAlgo
@@ -25,7 +25,7 @@ export const usePasswordHash = () => {
     password: string
   }) => {
     const hash = await computeHash(password, algo)
-    setPasswordHash({ hash, algo })
+    await setPasswordHash({ hash, algo })
   }
 
   const isPasswordValid = async (password: string) => {

@@ -10,8 +10,6 @@ import {
   Container,
   Divider,
   GlobalStyles,
-  IconButton,
-  InputAdornment,
   List,
   ListItem,
   ListItemButton,
@@ -20,7 +18,6 @@ import {
   MenuItem,
   Select,
   Snackbar,
-  Switch,
   TextField,
 } from "@mui/material"
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
