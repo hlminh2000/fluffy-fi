@@ -4,19 +4,10 @@ import * as yup from 'yup'
 import { SecretInput } from "./SecretInput";
 import { Box, Button, Link } from "@mui/material";
 import { STORAGE_KEY } from "~common/utils/constants";
+import type { PlaidConnectionStorage } from "~common/plaidTypes";
 
 export const usePlaidConnection = () => {
-  const [plaidConnection, setPlaidConnection] = useStorageVault<{
-    basePath: "sandbox" | "development" | "production",
-    baseOptions: {
-      headers: {
-        'PLAID-CLIENT-ID': string,
-        'PLAID-SECRET': string,
-        'Plaid-Version': '2020-09-14',
-        "Content-Type": "application/json"
-      },
-    },
-  }>(STORAGE_KEY.plaidConnection);
+  const [plaidConnection, setPlaidConnection] = useStorageVault<PlaidConnectionStorage>(STORAGE_KEY.plaidConnection);
   return {
     plaidConnection,
     setPlaidConnection

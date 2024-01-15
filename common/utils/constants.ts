@@ -7,6 +7,7 @@ export enum STORAGE_KEY {
   currentSetupStep = "currentSetupStep",
   plaidConnection = "plaidConnection",
   plaidItems = "plaidItems",
+  transactions = "transactions",
 }
 
 export enum COLOR_THEME {

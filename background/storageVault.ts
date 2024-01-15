@@ -86,17 +86,17 @@ export const storageVault = (() => {
   const isEncryptedObject = (data: any): data is EncryptedObject => data?.algo in EncryptionAlgo
   const isUnlocked = () => passwordCache.isPasswordSet()
 
-  const set = async <T>(storageKey: string, value: T) => {
+  const set = async <T>(storageKey: string, value: T, password?: string) => {
     if (!isUnlocked()) throw new Error("No password cache available")
     const algo = EncryptionAlgo["AES-CBC"]
-    const cipher = await encrypt(value, await passwordCache.getPassword(), algo)
+    const cipher = await encrypt(value, password || await passwordCache.getPassword(), algo)
     await storage.set(storageKey, cipher)
   }
-  const get = async <T>(storageKey: string): Promise<T> => {
+  const get = async <T>(storageKey: string, password?: string): Promise<T> => {
     if (!isUnlocked()) throw new Error("No password cache available")
     const storedData = await storage.get(storageKey) as any
     if (isEncryptedObject(storedData)) {
-      const value = await decrypt<T>(storedData, await passwordCache.getPassword())
+      const value = await decrypt<T>(storedData, password || await passwordCache.getPassword())
       return value
     } else {
       return storedData as T
@@ -108,13 +108,13 @@ export const storageVault = (() => {
   }
 
   return {
-    set: (<T>(storageKey: string, value: T) => {
+    set: (<T>(storageKey: string, value: T, password?: string) => {
       if (!queues[storageKey]) queues[storageKey] = new Queue(1)
-      return queues[storageKey].add(() => set(storageKey, value))
+      return queues[storageKey].add(() => set(storageKey, value, password))
     }) as typeof set,
-    get: (<T>(storageKey: string) => {
+    get: (<T>(storageKey: string, password?: string) => {
       if (!queues[storageKey]) queues[storageKey] = new Queue(1)
-      return queues[storageKey].add(() => get<T>(storageKey))
+      return queues[storageKey].add(() => get<T>(storageKey, password))
     }) as typeof get,
     remove: ((storageKey: string) => {
       if (!queues[storageKey]) queues[storageKey] = new Queue(1)

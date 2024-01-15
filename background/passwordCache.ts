@@ -2,7 +2,8 @@ import { Storage } from "@plasmohq/storage";
 import { DEFAULT_SESSION_TIMEOUT_MINUTES, STORAGE_KEY } from "~common/utils/constants";
 
 export const passwordCache = (() => {
-  let _password: string | null = null
+  let _sessionPassword: string | null = null
+  let _longTermCache: string | null = null
   let timeout: ReturnType<typeof setTimeout> | null = null;
   const storage = new Storage();
 
@@ -11,7 +12,8 @@ export const passwordCache = (() => {
   }, 60000)
 
   const setPassword = async (password: string | null) => {
-    _password = password;
+    _longTermCache = password;
+    _sessionPassword = password;
     if (timeout) clearTimeout(timeout)
     const sessionTimeoutMinutes = Number(
       await storage.get(STORAGE_KEY.sessionTimeoutMinutes)
@@ -22,8 +24,9 @@ export const passwordCache = (() => {
   }
 
   return {
-    isPasswordSet: () => _password !== null,
+    isPasswordSet: () => _sessionPassword !== null,
     setPassword,
-    getPassword: () => _password
+    getPassword: () => _sessionPassword,
+    getLongTermCache: () => _longTermCache,
   }
 })()

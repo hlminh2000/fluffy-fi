@@ -1,14 +1,11 @@
-import type { PlaidItemAccessToken, PlaidItemMetadata } from "~common/plaidTypes";
+import type { PlaidItemAccessToken, PlaidItemMetadata, PlaidItemStorage } from "~common/plaidTypes";
 import { STORAGE_KEY } from "./constants";
 import { useStorageVault } from "./useStorageVault";
 import { usePlaidConnection } from "~common/components/PlaidConnection";
 
 export const usePlaidItems = () => {
   const { plaidConnection } = usePlaidConnection()
-  const [plaidItems, setPlaidItems] = useStorageVault<{
-    access: PlaidItemAccessToken,
-    metadata: PlaidItemMetadata
-  }[]>(STORAGE_KEY.plaidItems);
+  const [plaidItems, setPlaidItems] = useStorageVault<PlaidItemStorage>(STORAGE_KEY.plaidItems);
 
   const plaidItemsFallback = plaidItems || []
   const addPlaidItem = async (publicToken: string, metadata:PlaidItemMetadata) => {
