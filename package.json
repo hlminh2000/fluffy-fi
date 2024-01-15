@@ -20,6 +20,7 @@
     "@mui/material": "^5.15.1",
     "@plasmohq/messaging": "^0.6.1",
     "@plasmohq/storage": "^1.9.0",
+    "@types/lodash": "^4.14.202",
     "@types/promise-queue": "^2.2.3",
     "lodash": "^4.17.21",
     "plaid": "^18.2.0",
