@@ -36,6 +36,7 @@ import { PlaidConnection } from "~common/components/PlaidConnection";
 import HubIcon from '@mui/icons-material/Hub';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { usePlaidItems } from "~common/utils/usePlaidItems";
+import { PlaidLink } from "~common/components/PlaidLink";
 
 const ChangePassword = () => {
 
@@ -116,12 +117,31 @@ const BankConnections = () => {
   const { plaidItems } = usePlaidItems();
   return (
     <Box>
-      <pre>{JSON.stringify(plaidItems, null, 2)}</pre>
+      <Box mt={2}>
+        <PlaidLink buttonTitle="New Connection" />
+      </Box>
+      {plaidItems.map(({ access, metadata: { institution, accounts } }) => (
+        <Card key={access.item_id} sx={{mt: 2}}>
+          <CardHeader title={institution.name} />
+          <Divider />
+          <CardContent>
+            <List>
+              {
+                accounts.map(a => (
+                  <ListItem>
+                    <ListItemText>{a.name}</ListItemText>
+                  </ListItem>
+                ))
+              }
+            </List>
+          </CardContent>
+        </Card>
+      ))}
     </Box>
   )
 }
 
-const PlaidSettings = () => {
+const ConnectionSettings = () => {
 
   const snackbarState = useSnackbarState();
   const { snackbarMessage, snackbarOpen, messageType } = snackbarState;
@@ -215,7 +235,7 @@ function IndexPopup() {
           <Box sx={{ flexGrow: 1 }} p={0}>
             <Container sx={{ py: 8, minHeight: "100vh" }}>
               <Box mt={2}>
-                <PlaidSettings />
+                <ConnectionSettings />
               </Box>
               <Box mt={2}>
                 <SecuritySettings />

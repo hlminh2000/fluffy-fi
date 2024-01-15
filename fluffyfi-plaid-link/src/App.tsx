@@ -3,7 +3,9 @@ import { Box, Button } from '@mui/material'
 import { usePlaidLink } from 'react-plaid-link';
 
 function App() {
-  const plaidLinkToken = (new URLSearchParams(window.location.search)).get("plaidLinkToken")
+  const searchParam = new URLSearchParams(window.location.search)
+  const plaidLinkToken = searchParam.get("plaidLinkToken")
+  const buttonTitle = searchParam.get("buttonTitle") || "Connect"
 
   const { open, ready } = usePlaidLink({
     token: plaidLinkToken,
@@ -22,7 +24,7 @@ function App() {
 
   return (
     <Box display={"flex"} justifyContent={"center"}>
-      <Button fullWidth size="small" variant="contained" disabled={!ready} onClick={onConnectClick}>Connect</Button>
+      <Button fullWidth size="small" variant="contained" disabled={!ready} onClick={onConnectClick}>{buttonTitle}</Button>
     </Box>
   );
 }

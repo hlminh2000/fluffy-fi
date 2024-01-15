@@ -5,79 +5,8 @@ import { CheckCircle } from "@mui/icons-material";
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import { PasswordSetterForm } from "~common/components/PasswordSetter"
 import { SetupSteps, useSetupStep } from "~common/utils/useSetupStep"
-import { PlaidConnection, usePlaidConnection } from "~common/components/PlaidConnection";
-import { useAsync } from 'react-async-hook';
-import {  useEffect,  useState } from "react";
-import { usePlaidItems, type PlaidItem } from "~common/utils/usePlaidItems";
-
-const PlaidLink = ({onComplete}: {onComplete: () => any}) => {
-
-  const { plaidConnection } = usePlaidConnection()
-  const [iframeExpanded, setIframeExpanded] = useState(false);
-  const { addPlaidItem } = usePlaidItems();
-
-  const { result } = useAsync(async () => (await fetch("https://sandbox.plaid.com/link/token/create", {
-    method: "POST",
-    headers: {
-      ...(plaidConnection?.baseOptions?.headers || {}),
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      clientId: plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"],
-      secret: plaidConnection?.baseOptions?.headers?.["PLAID-SECRET"],
-      name: "PluffyFi",
-      "user": {
-        "client_user_id": crypto.randomUUID(),
-        "phone_number": "+1 415 5550123"
-      },
-      "client_name": "Personal Finance App",
-      "products": ["transactions"],
-      "country_codes": ["US"],
-      "language": "en",
-      "redirect_uri": "https://local.fluffyfi/"
-    })
-  })).json(), [plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"]])
-  
-  type IframeMessage = { type: "PLAID_OPEN" } | { type: "PLAID_EXIT" } | { type: "PLAID_CONNECT_SUCCESS", payload: {public_token: string, metadata: {}} }
-  useEffect(() => {
-    const messageHandler = async (e: MessageEvent<IframeMessage>) => {
-      if (e.data.type === "PLAID_OPEN") return setIframeExpanded(true)
-      if (e.data.type === "PLAID_EXIT") return setIframeExpanded(false)
-      if (e.data.type === "PLAID_CONNECT_SUCCESS") {
-        const { payload } = e.data
-        const plaidItem = (await fetch("https://sandbox.plaid.com/item/public_token/exchange", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            client_id: plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"],
-            secret: plaidConnection?.baseOptions?.headers?.["PLAID-SECRET"],
-            public_token: payload.public_token
-          })
-        }).then(res => res.json())) as PlaidItem
-        await addPlaidItem(plaidItem)
-        onComplete()
-      }
-    }
-    window.addEventListener("message", messageHandler)
-    return () => {
-      window.removeEventListener("message", messageHandler)
-    }
-  }, [plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"], plaidConnection?.baseOptions?.headers?.["PLAID-SECRET"]])
-
-  return (
-    <Box>
-      <Typography>FluffyFi connects to your financial institutions to gather your financial data.</Typography>
-      {result?.link_token && (
-        <Box mt={2}>
-          <iframe
-            src={`http://localhost:3001?plaidLinkToken=${result.link_token}`}
-            style={{ width: "100%", border: "none", height: !iframeExpanded ? 32 : 660 }}
-          />
-        </Box>
-      )}
-    </Box>
-  )
-}
+import { PlaidConnection } from "~common/components/PlaidConnection";
+import { PlaidLink } from "~common/components/PlaidLink";
 
 export default () => {
 
@@ -139,7 +68,12 @@ export default () => {
                   </ListItem>
                   <Collapse unmountOnExit in={currentStep === SetupSteps.INSTITUTION_CONNECTION}>
                     <Box display="flex" flexDirection="column" p={2} pt={0}>
-                      <PlaidLink onComplete={() => setCurrentStep(SetupSteps.COMPLETED)}/>
+                      <Box>
+                        <Typography>FluffyFi connects to your financial institutions to gather your financial data.</Typography>
+                        <Box mt={2}>
+                          <PlaidLink onComplete={() => setCurrentStep(SetupSteps.COMPLETED)} />
+                        </Box>
+                      </Box>
                     </Box>
                   </Collapse>
                   <Collapse unmountOnExit in={currentStep === SetupSteps.COMPLETED}>
