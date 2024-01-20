@@ -53,7 +53,7 @@ export const PlaidLink = ({ onComplete, buttonTitle="Connect" }: { onComplete?: 
   if (!result?.link_token) return null
   return (
     <iframe
-      src={`http://localhost:3001?plaidLinkToken=${result.link_token}&buttonTitle=${buttonTitle}`}
+      src={`https://fluffyfi-plaid-link.vercel.app/?plaidLinkToken=${result.link_token}&buttonTitle=${buttonTitle}`}
       style={{ width: "100%", border: "none", height: !iframeExpanded ? 32 : 660, transition: "all 0.5s" }}
     />
   )
