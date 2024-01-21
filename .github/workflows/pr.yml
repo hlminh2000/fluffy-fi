@@ -1,4 +1,4 @@
-name: "Build debug package"
+name: "PR builds"
 on:
   pull_request: 
 

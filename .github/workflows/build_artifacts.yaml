@@ -2,7 +2,7 @@ name: "Build artifact"
 on:
   workflow_call:
     inputs:
-      is_publishable_package:
+      include_publishable_package:
         type: boolean
         default: false
         description: Whether the package is a potential candidate for publishing
@@ -13,10 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: 
-          - "firefox-mv2"
-          - "chrome-mv3"
-          - "edge-mv3"
+        target: ["firefox-mv2", "chrome-mv3", "edge-mv3"]
     steps:
       - uses: actions/checkout@v3
       - name: Cache pnpm modules
@@ -39,23 +36,19 @@ jobs:
         run: pnpm install --frozen-lockfile
       
       - name: Build a debuggable package
-        if: ${{ !inputs.is_publishable_package }}
         run: pnpm build --target=${{matrix.target}} --source-maps --bundle-buddy --no-minify --tag=debug-${{github.sha}} -- --zip
-
-      - name: Build a publishable package
-        if: ${{ inputs.is_publishable_package }}
-        run: pnpm build --target=${{matrix.target}} --tag=prod-${{github.sha}} -- --zip
-
       - name: Upload debuggable artifact
-        if: ${{ !inputs.is_publishable_package }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{matrix.target}}
+          name: ${{matrix.target}}-debug
           path: build/${{matrix.target}}-debug-${{github.sha}}.zip
 
+      - name: Build a publishable package
+        if: ${{ inputs.include_publishable_package }}
+        run: pnpm build --target=${{matrix.target}} --tag=prod-${{github.sha}} -- --zip
       - name: Upload publishable artifact
-        if: ${{ inputs.is_publishable_package }}
+        if: ${{ inputs.include_publishable_package }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{matrix.target}}
+          name: ${{matrix.target}}-prod
           path: build/${{matrix.target}}-prod-${{github.sha}}.zip

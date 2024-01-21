@@ -1,4 +1,4 @@
-name: "Build production package"
+name: "Main branch builds"
 on:
   push:
     branches: main 
@@ -8,4 +8,4 @@ jobs:
     name: "Build artifacts"
     uses: ./.github/workflows/build_artifacts.yaml
     with:
-      is_publishable_package: true
+      include_publishable_package: true

@@ -11,16 +11,21 @@ on:
         type: string
         required: true
         description: "Sementic version tag for this release (eg: 1.2.3)"
+      official_release:
+        type: boolean
+        default: true
+        description: "This is an official release?"
 
 jobs:
   publish_to_stores:
+    if: false
     name: Publish to ${{ matrix.stores }} store
     runs-on: ubuntu-latest
     strategy:
       matrix: 
         stores:
-          # - no
-          - Chrome
+          - no
+          # - Chrome
           # - Firefox
           # - Edge
     steps:
@@ -35,9 +40,9 @@ jobs:
       - name: Identify packages
         id: identify-package
         run: |
-          echo "chrome_package=$(ls chrome-*.zip)" >> "$GITHUB_OUTPUT"
-          echo "firefox_package=$(ls firefox-*.zip)" >> "$GITHUB_OUTPUT"
-          echo "edge_package=$(ls edge-*.zip)" >> "$GITHUB_OUTPUT"
+          echo "chrome_package=$(ls chrome-*-prod.zip)" >> "$GITHUB_OUTPUT"
+          echo "firefox_package=$(ls firefox-*-prod.zip)" >> "$GITHUB_OUTPUT"
+          echo "edge_package=$(ls edge-*-prod.zip)" >> "$GITHUB_OUTPUT"
 
       - name: Chrome store upload
         if: ${{ matrix.stores == 'Chrome' }}
@@ -84,17 +89,17 @@ jobs:
         id: print_download_output
         run: echo '${{ steps.download-packages.outputs.artifacts }}'
 
-      # - name: Install GH CLI
-      #   uses: dev-hanz-ops/install-gh-cli-action@v0.1.0
-      #   with:
-      #     gh-cli-version: 2.32.0 # optional, see action.yml for current default
+      - name: Install GH CLI
+        uses: dev-hanz-ops/install-gh-cli-action@v0.1.0
+        with:
+          gh-cli-version: 2.32.0 # optional, see action.yml for current default
 
       - name: Identify packages
         id: identify-package
         run: |
-          echo "chrome_package=$(ls chrome-*/*.zip)" >> "$GITHUB_OUTPUT"
-          echo "firefox_package=$(ls firefox-*/*.zip)" >> "$GITHUB_OUTPUT"
-          echo "edge_package=$(ls edge-*/*.zip)" >> "$GITHUB_OUTPUT"
+          echo "chrome_package=$(ls chrome-*-prod/*.zip)" >> "$GITHUB_OUTPUT"
+          echo "firefox_package=$(ls firefox-*-prod/*.zip)" >> "$GITHUB_OUTPUT"
+          echo "edge_package=$(ls edge-*-prod/*.zip)" >> "$GITHUB_OUTPUT"
 
       - name: Rename packages
         id: rename-packages
@@ -103,15 +108,33 @@ jobs:
           mv ${{ steps.identify-package.outputs.firefox_package }} ./firefox-${{ inputs.tag }}.zip
           mv ${{ steps.identify-package.outputs.edge_package }} ./edge-${{ inputs.tag }}.zip
 
-      - name: Create release
-        id: create-release
+      - name: Create pre-release release
+        id: create-pre-release
+        if: ${{ !inputs.official_release }}
         env:
           GH_TOKEN: ${{ secrets.ACCESS_DEVOPS_TOKEN }}
         run: |
           ls -la
           ls -la -- */
           gh release create ${{ inputs.tag }} \
-            chrome-${{ inputs.tag }}.zip \
+            chrome-${{ inputs.tag }}.zip firefox-${{ inputs.tag }}.zip edge-${{ inputs.tag }}.zip \
+            --repo="$GITHUB_REPOSITORY" \
+            --title=v${{ inputs.tag }} \
+            --target=${{ inputs.target_commit }} \
+            --latest \
+            --generate-notes \
+            --prerelease
+      
+      - name: Create an official release
+        id: create-release
+        if: ${{ inputs.official_release }}
+        env:
+          GH_TOKEN: ${{ secrets.ACCESS_DEVOPS_TOKEN }}
+        run: |
+          ls -la
+          ls -la -- */
+          gh release create ${{ inputs.tag }} \
+            chrome-${{ inputs.tag }}.zip firefox-${{ inputs.tag }}.zip edge-${{ inputs.tag }}.zip \
             --repo="$GITHUB_REPOSITORY" \
             --title=v${{ inputs.tag }} \
             --target=${{ inputs.target_commit }} \
