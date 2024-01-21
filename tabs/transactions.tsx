@@ -1,5 +1,5 @@
 // import "https://cdn.plaid.com/link/v2/stable/link-initialize.js"
-import { Avatar, Box, Button, Card, CardContent, CardHeader, Collapse, Container, Divider, Grid, IconButton, LinearProgress, List, ListItem, ListItemIcon, ListItemText, Paper, Skeleton, TextField, Typography, useTheme } from "@mui/material"
+import { Avatar, Box, Card, CardContent, CardHeader, Container, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, Skeleton, useTheme } from "@mui/material"
 import { FluffyThemeProvider } from "~common/utils/theme"
 import { sendToBackground } from "@plasmohq/messaging";
 import { LoginGate } from "~common/components/LoginGate";
@@ -11,7 +11,7 @@ import EditIcon from '@mui/icons-material/Edit';
 
 import { DateRangePicker } from "mui-daterange-picker";
 import moment from "moment";
-import { uniq } from "lodash";
+import _ from "lodash";
 
 export default () => {
 
@@ -22,8 +22,31 @@ export default () => {
     endDate: moment().endOf("day"),
     label: "This Week"
   })
+  const DATE_FORMAT = "YYYY-MM-DD"
 
-  const { result, execute, loading } = useAsync(() => transactionDb.allDocs({ include_docs: true }).then(result => result.rows), []);
+  const serializedDateRange = {
+    startDate: dateRange.startDate.format(DATE_FORMAT),
+    endDate: dateRange.endDate.format(DATE_FORMAT)
+  }
+
+  const { result, execute, loading } = useAsync(
+    async () => {
+      const index = await transactionDb.createIndex({
+        index: { fields: ["date"] }
+      })
+      console.log("index: ", index)
+      return transactionDb.find({
+        selector: {
+          $and: [
+            { date: { $gte: serializedDateRange.startDate }},
+            { date: { $lte: serializedDateRange.endDate }},
+          ]
+        },
+        sort: [ { date: "desc" } ]
+      }).then(result => result.docs)
+    },
+    [serializedDateRange.startDate, serializedDateRange.endDate]
+  );
   const [syncing, setSyncing] = useState(false);
 
   const [open, setOpen] = useState(false);
@@ -36,9 +59,11 @@ export default () => {
     setSyncing(false)
   }
 
-  const transactionDates = uniq((result || []).map(({ doc }) => doc.date)).map((dateString) => moment(dateString));
-
-  const DATE_FORMAT = "MM/DD/YYYY"
+  const transactionDates = _(result || [])
+    .map((doc) => doc.date)
+    .uniq()
+    .map((dateString) => moment(dateString))
+    .value()
 
   return (
     <FluffyThemeProvider>
@@ -63,7 +88,11 @@ export default () => {
             />
             <Divider />
             <Box>
-              <DateRangePicker {...{ open, toggle, onChange: console.log }} wrapperClassName="date-picker" />
+              <DateRangePicker {...{ open, toggle, onChange: e => setDateRange({
+                startDate: moment(e.startDate),
+                endDate: moment(e.endDate),
+                label: e.label
+              }) }} wrapperClassName="date-picker" />
             </Box>
             <CardContent>
               <List>
@@ -80,8 +109,8 @@ export default () => {
                       <Divider />
                       {
                         result
-                          ?.filter(({ doc }) => moment(doc.date).format(DATE_FORMAT) === date.format(DATE_FORMAT))
-                          .map(({ doc }, i) => (
+                          ?.filter((doc) => moment(doc.date).format(DATE_FORMAT) === date.format(DATE_FORMAT))
+                          .map((doc, i) => (
                             <React.Fragment key={doc._id}>
                               {i !== 0 && <Divider variant="inset" />}
                               <ListItem secondaryAction={
