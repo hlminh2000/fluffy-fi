@@ -61,7 +61,7 @@ export const SecuritySettings = () => {
 
   const [changePasswordOpen, setChangePasswordOpen] = useState(false)
   return (
-    <Card>
+    <Card variant="outlined">
       <CardHeader title="Security" />
       <Divider />
       <CardContent>

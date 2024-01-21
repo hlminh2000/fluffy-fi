@@ -100,7 +100,7 @@ export const ConnectionSettings = () => {
   const [plaidConnectionOpen, setPlaidConnectionOpen] = useState(false)
   const [bankConnectionsOpen, setBankConnectionsOpen] = useState(false)
   return (
-    <Card>
+    <Card variant="outlined">
       <CardHeader title="Connections" />
       <Divider />
       <CardContent>

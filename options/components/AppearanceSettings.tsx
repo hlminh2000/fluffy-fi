@@ -20,7 +20,7 @@ export const AppearanceSettings = () => {
   const onColorThemeChange: React.ComponentProps<typeof Select>['onChange'] =
     (e) => setColorTheme(e.target.value as COLOR_THEME)
   return (
-    <Card>
+    <Card variant="outlined">
       <CardHeader title="Appearance" />
       <Divider />
       <CardContent>
