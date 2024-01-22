@@ -177,25 +177,20 @@ export default () => {
                   colors={{ scheme: 'nivo' }}
                   childColor={{
                     from: 'color',
-                    modifiers: [
-                      [
-                        'brighter',
-                        0.2
-                      ]
-                    ]
+                    modifiers: [ ['brighter', 0.2] ]
                   }}
                   arcLabel={d => `${d.id} ($${d.value.toLocaleString()})`}
                   enableArcLabels={true}
                   arcLabelsSkipAngle={10}
-                  arcLabelsTextColor={{
-                    from: 'color',
-                    modifiers: [
-                      [
-                        'darker',
-                        1.4
-                      ]
-                    ]
-                  }}
+                  // arcLabelsTextColor={{
+                  //   from: 'color',
+                  //   modifiers: [
+                  //     [
+                  //       'darker',
+                  //       1.4
+                  //     ]
+                  //   ]
+                  // }}
                 />
               </Box>
             )}
