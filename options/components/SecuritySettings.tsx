@@ -44,7 +44,8 @@ const ChangePassword = () => {
       <ListItem sx={{ pl: 10 }}>
         <Button fullWidth variant="contained" disabled={loading} onClick={onPasswordChangeClick}>Change Password</Button>
       </ListItem>
-    </List>)
+    </List>
+  )
 }
 
 export const SecuritySettings = () => {

@@ -29,6 +29,7 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { useAsync } from "react-async-hook";
 import orderBy from 'lodash/orderBy'
 import type { PlaidItemAccount } from "~common/plaidTypes";
+import { AccountTypeIcon } from "~common/components/AccountTypeIcon";
 
 const useAccounts = (accessToken: string) => {
   const { plaidConnection } = usePlaidConnection();
@@ -71,13 +72,7 @@ const PlaidItem = ({ plaidItem }: { plaidItem: ReturnType<typeof usePlaidItems>[
                   </Box>
                 }>
                   <ListItemIcon>
-                    {{
-                      depository: <MonetizationOnIcon />,
-                      credit: <CreditCardIcon />,
-                      loan: <CreditCardIcon />,
-                      mortgage: <CreditCardIcon />,
-                      investment: <TrendingUpIcon />
-                    }[a.type] || <LocalAtmIcon />}
+                    <AccountTypeIcon type={a.type} />
                   </ListItemIcon>
                   <ListItemText>{a.name}</ListItemText>
                 </ListItem>

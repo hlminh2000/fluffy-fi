@@ -1,4 +1,3 @@
-
 export enum STORAGE_KEY {
   passwordHash = "passwordHash",
   lastLoginTime = "lastLoginTime",
