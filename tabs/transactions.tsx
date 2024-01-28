@@ -1,91 +1,21 @@
 // import "https://cdn.plaid.com/link/v2/stable/link-initialize.js"
-import { Avatar, Box, ButtonBase, Card, CardContent, CardHeader, Container, Divider, GlobalStyles, Grid, IconButton, List, ListItem, ListItemIcon, ListItemText, Skeleton, Tab, Tabs, useTheme } from "@mui/material"
+import { Avatar, Box, Card, CardContent, CardHeader, Chip, Container, Divider, FormControl, GlobalStyles, IconButton, InputLabel, List, ListItem, ListItemIcon, ListItemText, MenuItem, OutlinedInput, Select, Skeleton, useTheme } from "@mui/material"
 import { FluffyThemeProvider } from "~common/utils/theme"
 import { sendToBackground } from "@plasmohq/messaging";
 import { LoginGate } from "~common/components/LoginGate";
 import { useAsync } from "react-async-hook";
 import { transactionDb, balanceDb } from "~common/PouchDbs";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import SyncIcon from '@mui/icons-material/Sync';
 import EditIcon from '@mui/icons-material/Edit';
 import { DateRangePicker } from "mui-daterange-picker";
 import moment from "moment";
 import _ from "lodash";
-import { CheckCircle, CircleOutlined } from "@mui/icons-material";
 import { AccountTypeIcon } from "~common/components/AccountTypeIcon";
-import type { PlaidAccount, PlaidTransaction } from "~common/plaidTypes";
-import { ResponsiveSunburst } from '@nivo/sunburst'
+import { DATE_FORMAT } from "~common/utils/constants";
+import { CumulativeSpendingChart } from "./components/cumulativeSpendingChart";
+import { CategorySunburst } from "./components/CategorySunBurst";
 
-type SunburstNode = {
-  id: string,
-  value?: number,
-  children?: SunburstNode[]
-}
-export const computeCategorySunburstData = (
-  transactions: Partial<PlaidTransaction>[],
-): SunburstNode => {
-  const node: SunburstNode = {
-    id: "root",
-    value: 0,
-    children: [],
-  }
-  const process = (parent: SunburstNode, categoryChain: string[], amount: number) => {
-    const currentCategory = categoryChain[0]
-    if (!currentCategory) return parent
-    let currentNode = parent.children.find(node => node.id === currentCategory)
-    if (!currentNode) {
-      currentNode = { id: currentCategory, value: 0, children: [] }
-      parent.children.push(currentNode)
-    }
-    currentNode.value += amount
-    const subCategoryChain = categoryChain.slice(1, categoryChain.length)
-    process(currentNode, subCategoryChain, amount)
-  }
-  transactions.forEach(transaction => {
-    node.value += transaction.amount
-    process(node, transaction.category, transaction.amount)
-  })
-  const cleanup = (node: SunburstNode) => {
-    if(node.children.length) {
-      delete node.value
-      node.children.forEach(cleanup)
-    } else {
-      delete node.children
-    }
-  }
-  cleanup(node)
-  return node
-}
-
-const AccountsList = ({ accounts, selectedAccounts, onAccountClicked }: {
-  accounts: PlaidAccount[],
-  selectedAccounts: { [accountId: string]: boolean },
-  onAccountClicked: (account: typeof accounts[0]) => any
-}) => {
-  return (
-    <Grid container spacing={2}>
-      {accounts?.map(account => (
-        <Grid item xs={6} md={2} key={account.account_id}>
-          <ButtonBase sx={{ width: "100%", height: "100%" }} onClick={() => onAccountClicked(account)}>
-            <Card sx={{ width: "100%", height: "100%" }} variant="outlined">
-              <CardHeader
-                title={`$${account.balances.current.toFixed(2)}`}
-                subheader={
-                  <Box display="flex" alignItems="center" justifyContent="center">
-                    <AccountTypeIcon type={account.type} />{' '}{account.name}
-                  </Box>
-                }
-                action={
-                  selectedAccounts?.[account.account_id] ? <CheckCircle color={"success"} /> : <CircleOutlined color="disabled" />
-                }
-              />
-            </Card>
-          </ButtonBase>
-        </Grid>
-      ))}
-    </Grid>
-  )
-}
 
 export default () => {
 
@@ -96,7 +26,6 @@ export default () => {
     endDate: moment().endOf("day"),
     label: "This Week"
   })
-  const DATE_FORMAT = "YYYY-MM-DD"
 
   const serializedDateRange = {
     startDate: dateRange.startDate.format(DATE_FORMAT),
@@ -121,9 +50,14 @@ export default () => {
     },
     []
   )
-  const [selectedAccounts, setSelectedAccounts] = useState<{ [accountId: string]: boolean }>()
+  const accountIndex = useMemo(
+    () => accounts?.reduce((acc, a) => ({ ...acc, [a.account_id]: a }), {} as { [id: string]: typeof accounts[0] }) || [] as typeof accounts,
+    [accounts]
+  )
+
+  const [selectedAccounts, setSelectedAccounts] = useState<string[]>()
   useEffect(() => {
-    if (!selectedAccounts && accounts) setSelectedAccounts(accounts.reduce((acc, a) => ({ ...acc, [a._id]: true }), {}))
+    if (!selectedAccounts && accounts) setSelectedAccounts(accounts.map(a => a.account_id))
   }, [accounts])
 
   const { result: transactions, execute: syncTransactions, loading } = useAsync(
@@ -132,13 +66,12 @@ export default () => {
       await transactionDb.createIndex({
         index: { fields: ["date", "account_id"] }
       })
-      const accountIdsToFilter = Object.keys(selectedAccounts).filter(accountId => selectedAccounts[accountId])
       return transactionDb.find({
         selector: {
           $and: [
             { date: { $gte: serializedDateRange.startDate } },
             { date: { $lte: serializedDateRange.endDate } },
-            { account_id: { $in: accountIdsToFilter } }
+            { account_id: { $in: selectedAccounts } }
           ]
         },
         sort: [{ date: "desc" }]
@@ -152,54 +85,67 @@ export default () => {
     .map((dateString) => moment(dateString))
     .value()
 
-  const [selectedTab, setSelectedTab] = useState<0 | 1>(0)
- 
-  const categorySunburstData = computeCategorySunburstData(transactions?.filter(t => t.amount > 0) || [])
+  const spendings = transactions?.filter(t => !["Transfer"].some(category => t.category.includes(category))) || [] as typeof transactions
 
   return (
     <FluffyThemeProvider>
       <LoginGate>
         <Box py={2}>
           <Container>
-            {selectedTab === 0 && (
-              <AccountsList accounts={accounts} selectedAccounts={selectedAccounts} onAccountClicked={account => setSelectedAccounts({
-                ...(selectedAccounts || {}),
-                [account.account_id]: !(selectedAccounts?.[account.account_id])
-              })} />
-            )}
-            {selectedTab === 1 && (
-              <Box height={500}>
-                <ResponsiveSunburst
-                  data={categorySunburstData}
-                  margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-                  cornerRadius={6}
-                  borderColor={{ theme: 'background' }}
-                  colors={{ scheme: 'nivo' }}
-                  childColor={{
-                    from: 'color',
-                    modifiers: [ ['brighter', 0.2] ]
-                  }}
-                  arcLabel={d => `${d.id} ($${d.value.toLocaleString()})`}
-                  enableArcLabels={true}
-                  arcLabelsSkipAngle={10}
-                  // arcLabelsTextColor={{
-                  //   from: 'color',
-                  //   modifiers: [
-                  //     [
-                  //       'darker',
-                  //       1.4
-                  //     ]
-                  //   ]
-                  // }}
-                />
-              </Box>
-            )}
+            <FormControl fullWidth>
+              <InputLabel id="accounts">Accounts</InputLabel>
+              <Select <string[]>
+                fullWidth
+                labelId="accounts"
+                multiple
+                value={selectedAccounts || []}
+                onChange={e => setSelectedAccounts(e.target.value as string[])}
+                input={<OutlinedInput label="Accounts" />}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {selected.map((accountId) => (
+                      <Chip
+                        icon={<AccountTypeIcon type={accountIndex[accountId]?.type} />}
+                        key={accountId}
+                        label={accountIndex[accountId]?.name}
+                      />
+                    ))}
+                  </Box>
+                )}
+              >
+                {accounts?.map((account) => (
+                  <MenuItem
+                    key={account.account_id}
+                    value={account.account_id}
+                  >
+                    <ListItem secondaryAction={
+                      <ListItemText>
+                        ${(account.balances.current).toFixed(2)}
+                      </ListItemText>
+                    }>
+                      <ListItemIcon>
+                        <AccountTypeIcon type={account.type} />
+                      </ListItemIcon>
+                      <ListItemText>
+                        {account.name}
+                      </ListItemText>
+                    </ListItem>
+                    <Divider />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Container>
+
+          <Box height={500} display={"flex"} flexDirection={"row"}>
+            <Box flex={1}>
+              <CumulativeSpendingChart transactions={spendings || []} fromDate={dateRange.startDate} toDate={dateRange.endDate} />
+            </Box>
+            <Box width={600}>
+              <CategorySunburst transactions={spendings} />
+            </Box>
+          </Box>
         </Box>
-        <Tabs value={selectedTab} onChange={(e, tabIndex) => setSelectedTab(tabIndex)} centered>
-          <Tab label="Accounts" />
-          <Tab label="Spend Categories" />
-        </Tabs>
         <Divider />
         <Container>
           <Card sx={{ overflow: "hidden", my: 2 }} variant="outlined">

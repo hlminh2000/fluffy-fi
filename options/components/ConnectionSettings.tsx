@@ -22,10 +22,6 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { usePlaidItems } from "~common/utils/usePlaidItems";
 import { PlaidLink } from "~common/components/PlaidLink";
 import EditIcon from '@mui/icons-material/Edit';
-import CreditCardIcon from '@mui/icons-material/CreditCard';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import LocalAtmIcon from '@mui/icons-material/LocalAtm';
-import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { useAsync } from "react-async-hook";
 import orderBy from 'lodash/orderBy'
 import type { PlaidItemAccount } from "~common/plaidTypes";

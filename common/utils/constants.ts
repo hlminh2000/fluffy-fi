@@ -15,3 +15,4 @@ export enum COLOR_THEME {
   system = "system",
 }
 export const DEFAULT_SESSION_TIMEOUT_MINUTES = 5
+export const DATE_FORMAT = "YYYY-MM-DD"

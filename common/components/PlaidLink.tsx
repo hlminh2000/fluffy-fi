@@ -8,6 +8,8 @@ export const PlaidLink = ({ onComplete, buttonTitle="Connect" }: { onComplete?: 
   const { addPlaidItem } = usePlaidItems();
   const [iframeExpanded, setIframeExpanded] = useState(false);
   const { plaidConnection } = usePlaidConnection()
+  const clientId = plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"]
+  const clientSecret = plaidConnection?.baseOptions?.headers?.["PLAID-SECRET"]
   const { result } = useAsync(async () => (await fetch("https://sandbox.plaid.com/link/token/create", {
     method: "POST",
     headers: {
@@ -15,9 +17,9 @@ export const PlaidLink = ({ onComplete, buttonTitle="Connect" }: { onComplete?: 
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      clientId: plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"],
-      secret: plaidConnection?.baseOptions?.headers?.["PLAID-SECRET"],
-      name: "PluffyFi",
+      client_id: clientId,
+      secret: clientSecret,
+      // name: "PluffyFi",
       "user": {
         "client_user_id": crypto.randomUUID(),
         "phone_number": "+1 415 5550123"
@@ -28,7 +30,7 @@ export const PlaidLink = ({ onComplete, buttonTitle="Connect" }: { onComplete?: 
       "language": "en",
       "redirect_uri": "https://local.fluffyfi/"
     })
-  })).json(), [plaidConnection?.baseOptions?.headers?.["PLAID-CLIENT-ID"]])
+  })).json(), [ clientId, clientSecret ])
 
   type IframeMessage = { type: "PLAID_OPEN" }
     | { type: "PLAID_EXIT" }
