@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material"
 import { ResponsiveSunburst } from "@nivo/sunburst"
+import { ComponentProps } from "react"
 import { PlaidTransaction } from "~common/plaidTypes"
 
 type SunburstNode = {
@@ -43,7 +44,10 @@ export const computeCategorySunburstData = (
   return node
 }
 
-export const CategorySunburst = (props: { transactions: PlaidTransaction[] }) => {
+export const CategorySunburst = (props: { 
+  transactions: PlaidTransaction[], 
+  onClick?: ComponentProps<typeof ResponsiveSunburst>['onClick'] 
+}) => {
   const { transactions } = props
   const spendings = transactions?.filter(t => t.amount > 0) || ([] as typeof transactions)
 
@@ -52,7 +56,8 @@ export const CategorySunburst = (props: { transactions: PlaidTransaction[] }) =>
 
   return (
     <Box height="100%" width="100%" position="relative">
-      <ResponsiveSunburst
+      <ResponsiveSunburst <SunburstNode>
+        onClick={props.onClick}
         data={categorySunburstData}
         margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
         cornerRadius={6}

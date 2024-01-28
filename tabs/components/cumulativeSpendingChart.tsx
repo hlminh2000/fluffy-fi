@@ -30,10 +30,11 @@ export const CumulativeSpendingChart = ({
 
   return (
     <ResponsiveLine
+      onMouseMove={console.log}
       data={[
         { id: "main", data: data.map(({ date, sum }) => ({ x: date.format(DATE_FORMAT), y: sum })) }
       ]}
-      margin={{ top: 50, right: 50, bottom: 50, left: 50 }}
+      margin={{ top: 10, right: 50, bottom: 50, left: 50 }}
       xScale={{ type: 'point' }}
       yScale={{
         type: 'linear',
