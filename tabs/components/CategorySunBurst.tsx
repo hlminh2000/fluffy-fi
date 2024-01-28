@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material"
+import { Box, Typography, useTheme } from "@mui/material"
 import { ResponsiveSunburst } from "@nivo/sunburst"
 import { ComponentProps } from "react"
 import { PlaidTransaction } from "~common/plaidTypes"
@@ -54,18 +54,20 @@ export const CategorySunburst = (props: {
   const categorySunburstData = computeCategorySunburstData(spendings)
   const sum = spendings.reduce((sum, t) => sum + t.amount, 0)
 
+  const theme = useTheme();
+
   return (
     <Box height="100%" width="100%" position="relative">
       <ResponsiveSunburst <SunburstNode>
         onClick={props.onClick}
         data={categorySunburstData}
         margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
-        cornerRadius={6}
+        cornerRadius={8}
         borderColor={{ theme: 'background' }}
         colors={{ scheme: 'nivo' }}
         childColor={{
           from: 'color',
-          modifiers: [['brighter', 0.2]]
+          modifiers: [[theme.palette.mode === "light" ? 'brighter' : "darker", 0.3]]
         }}
         arcLabel={d => `${d.id} ($${d.value.toLocaleString()})`}
         enableArcLabels={true}
