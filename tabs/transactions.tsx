@@ -1,5 +1,5 @@
 // import "https://cdn.plaid.com/link/v2/stable/link-initialize.js"
-import { Avatar, Box, Card, CardContent, CardHeader, Chip, Container, Divider, FormControl, GlobalStyles, IconButton, InputLabel, List, ListItem, ListItemIcon, ListItemText, MenuItem, OutlinedInput, Select, Skeleton, useTheme } from "@mui/material"
+import { Avatar, Box, Card, CardContent, CardHeader, Chip, Container, Divider, FormControl, GlobalStyles, Grid, IconButton, InputLabel, List, ListItem, ListItemIcon, ListItemText, MenuItem, OutlinedInput, Select, Skeleton, useTheme } from "@mui/material"
 import { FluffyThemeProvider } from "~common/utils/theme"
 import { sendToBackground } from "@plasmohq/messaging";
 import { LoginGate } from "~common/components/LoginGate";
@@ -136,15 +136,18 @@ export default () => {
               </Select>
             </FormControl>
           </Container>
-
-          <Box height={500} display={"flex"} flexDirection={"row"}>
-            <Box flex={1}>
-              <CumulativeSpendingChart transactions={spendings || []} fromDate={dateRange.startDate} toDate={dateRange.endDate} />
-            </Box>
-            <Box width={600}>
-              <CategorySunburst transactions={spendings} />
-            </Box>
-          </Box>
+          <Grid container>
+            <Grid item xs={12} md={8}>
+              <Box height={"500px"}>
+                <CumulativeSpendingChart transactions={spendings || []} fromDate={dateRange.startDate} toDate={dateRange.endDate} />
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Box height={"500px"}>
+                <CategorySunburst transactions={spendings} />
+              </Box>
+            </Grid>
+          </Grid>
         </Box>
         <Divider />
         <Container>
