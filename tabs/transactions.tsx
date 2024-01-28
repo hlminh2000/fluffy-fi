@@ -16,7 +16,7 @@ import { DATE_FORMAT } from "~common/utils/constants";
 import { CumulativeSpendingChart } from "./components/CumulativeSpendingChart";
 import { CategorySunburst } from "./components/CategorySunBurst";
 import { PlaidAccount } from "~common/plaidTypes";
-import { ChevronRight } from "@mui/icons-material";
+import { Cancel, ChevronRight, Delete, X } from "@mui/icons-material";
 
 
 export default () => {
@@ -201,12 +201,11 @@ export default () => {
                 <Card variant="outlined" sx={{ width: "100%", minHeight: "100%" }}>
                   <CardHeader title="Categories" subheader={
                     <Box display={"flex"} flexDirection={"row"} alignItems={"center"} flexWrap={"wrap"}>
-                      {!!categoryFilter.length && <Button sx={{ mt: 1 }} size="small" onClick={() => setCategoryFilter([])}>Clear</Button>}
                       {!!categoryFilter.length
                         ? categoryFilter.map((c, i) => (
                           <React.Fragment key={`${c}-${i}`}>
                             {i !== 0 && <ChevronRight sx={{mt: 1}} />}
-                            <Chip label={c} size="small" sx={{mt: 1}} />
+                            <Chip label={c} size="small" sx={{mt: 1}} deleteIcon={<Cancel />} onDelete={() => setCategoryFilter(categoryFilter.slice(0, i))} />
                           </React.Fragment>
                         ))
                         : "All"}
