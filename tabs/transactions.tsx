@@ -1,5 +1,5 @@
 // import "https://cdn.plaid.com/link/v2/stable/link-initialize.js"
-import { Avatar, Box, Button, Card, CardContent, CardHeader, Chip, Container, Divider, Fab, FormControl, GlobalStyles, Grid, IconButton, InputLabel, List, ListItem, ListItemIcon, ListItemText, MenuItem, Modal, OutlinedInput, Paper, Select, Skeleton, useTheme } from "@mui/material"
+import { Avatar, Box, Button, Card, CardContent, CardHeader, Chip, Container, Divider, Fab, FormControl, GlobalStyles, Grid, IconButton, InputLabel, List, ListItem, ListItemIcon, ListItemText, MenuItem, Modal, OutlinedInput, Paper, Select, Skeleton, Tab, Tabs, useTheme } from "@mui/material"
 import { FluffyThemeProvider } from "~common/utils/theme"
 import { sendToBackground } from "@plasmohq/messaging";
 import { LoginGate } from "~common/components/LoginGate";
@@ -16,7 +16,8 @@ import { DATE_FORMAT } from "~common/utils/constants";
 import { CumulativeSpendingChart } from "./components/CumulativeSpendingChart";
 import { CategorySunburst } from "./components/CategorySunBurst";
 import { PlaidAccount } from "~common/plaidTypes";
-import { Cancel, ChevronRight, Delete, X } from "@mui/icons-material";
+import { Cancel, ChevronRight } from "@mui/icons-material";
+import { CashflowChart } from "./components/CashflowChart";
 
 
 export default () => {
@@ -103,6 +104,8 @@ export default () => {
 
   const transactionByDates = _.groupBy(transactions, t => moment(t.date).format(DATE_FORMAT))
 
+  const [selectedTrendTab, setSelectedTrendTab] = useState<0 | 1>(0);
+
   return (
     <FluffyThemeProvider>
       <LoginGate>
@@ -151,70 +154,77 @@ export default () => {
                 ))}
               </Select>
             </FormControl>
-
-            <Grid container spacing={2} pt={2}>
-              <Grid item xs={12} md={8}>
-                <Card variant="outlined" sx={{ width: "100%", minHeight: "100%" }}>
-                  <CardHeader title="Cumulative Spend"
-                    subheader={
-                      <Box>
-                        <Box display={"flex"} alignItems={"center"}>
-                          {dateRange.label || `${dateRange.startDate.format(DATE_FORMAT)} ~ ${dateRange.endDate.format(DATE_FORMAT)}`}
-                          <IconButton onClick={toggle} size="small">
-                            <EditIcon />
-                          </IconButton>
-                        </Box>
-                      </Box>
-                    }
-                  />
-                  <Modal open={open} >
-                    <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center">
-                      <Paper sx={{ width: "690px", overflow: "hidden" }}>
-                        <GlobalStyles styles={{
-                          ".date-picker .MuiPaper-root": { boxShadow: "none" }
-                        }} />
-                        <DateRangePicker
-                          open
-                          onChange={e => setDateRange({
-                            startDate: moment(e.startDate),
-                            endDate: moment(e.endDate),
-                            label: e.label
-                          })}
-                          toggle={toggle}
-                          wrapperClassName="date-picker" />
-                      </Paper>
-                    </Box>
-                  </Modal>
-                  <CardContent sx={{ height: "400px" }}>
-                    <CumulativeSpendingChart transactions={spendings || []} fromDate={dateRange.startDate} toDate={dateRange.endDate} />
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Card variant="outlined" sx={{ width: "100%", minHeight: "100%" }}>
-                  <CardHeader title="Categories" subheader={
-                    <Box display={"flex"} flexDirection={"row"} alignItems={"center"} flexWrap={"wrap"}>
-                      {!!categoryFilter.length
-                        ? categoryFilter.map((c, i) => (
-                          <React.Fragment key={`${c}-${i}`}>
-                            {i !== 0 && <ChevronRight sx={{mt: 1}} />}
-                            <Chip label={c} size="small" sx={{mt: 1}} deleteIcon={<Cancel />} onDelete={() => setCategoryFilter(categoryFilter.slice(0, i))} />
-                          </React.Fragment>
-                        ))
-                        : "All"}
-                    </Box>
-                  } />
-                  <CardContent sx={{ height: "400px" }}>
-                    <CategorySunburst transactions={spendings} onClick={({ path }) =>
-                      setCategoryFilter(_.reverse(path.filter(p => p !== "root") as string[]))
-                    } />
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
           </Container>
         </Box>
-        {/* <Divider /> */}
+        <Container>
+          <Grid container spacing={2} pt={2}>
+            <Grid item xs={12} md={8}>
+              <Card variant="outlined" sx={{ width: "100%", minHeight: "100%" }}>
+                <CardHeader title="Trends"
+                  subheader={
+                    <Box>
+                      <Box display={"flex"} alignItems={"center"}>
+                        {dateRange.label || `${dateRange.startDate.format(DATE_FORMAT)} ~ ${dateRange.endDate.format(DATE_FORMAT)}`}
+                        <IconButton onClick={toggle} size="small">
+                          <EditIcon />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  }
+                />
+                <Modal open={open} >
+                  <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center">
+                    <Paper sx={{ width: "690px", overflow: "hidden" }}>
+                      <GlobalStyles styles={{
+                        ".date-picker .MuiPaper-root": { boxShadow: "none" }
+                      }} />
+                      <DateRangePicker
+                        open
+                        onChange={e => setDateRange({
+                          startDate: moment(e.startDate),
+                          endDate: moment(e.endDate),
+                          label: e.label
+                        })}
+                        toggle={toggle}
+                        wrapperClassName="date-picker" />
+                    </Paper>
+                  </Box>
+                </Modal>
+                <CardContent sx={{ height: "400px" }}>
+                  <Box height={"330px"}>
+                    {selectedTrendTab === 0 && <CumulativeSpendingChart transactions={spendings || []} fromDate={dateRange.startDate} toDate={dateRange.endDate} />}
+                    {selectedTrendTab === 1 && <CashflowChart transactions={spendings || []} fromDate={dateRange.startDate} toDate={dateRange.endDate} />}
+                  </Box>
+                  <Tabs value={selectedTrendTab} onChange={(e, newValue) => setSelectedTrendTab(newValue)} variant="fullWidth">
+                    <Tab label={"Cumulative Spend"} />
+                    <Tab label={"Cashflow"} />
+                  </Tabs>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Card variant="outlined" sx={{ width: "100%", minHeight: "100%" }}>
+                <CardHeader title="Categories" subheader={
+                  <Box display={"flex"} flexDirection={"row"} alignItems={"center"} flexWrap={"wrap"}>
+                    {!!categoryFilter.length
+                      ? categoryFilter.map((c, i) => (
+                        <React.Fragment key={`${c}-${i}`}>
+                          {i !== 0 && <ChevronRight sx={{ mt: 1 }} />}
+                          <Chip label={c} size="small" sx={{ mt: 1 }} deleteIcon={<Cancel />} onDelete={() => setCategoryFilter(categoryFilter.slice(0, i))} />
+                        </React.Fragment>
+                      ))
+                      : "All"}
+                  </Box>
+                } />
+                <CardContent sx={{ height: "400px" }}>
+                  <CategorySunburst transactions={spendings} onClick={({ path }) =>
+                    setCategoryFilter(_.reverse(path.filter(p => p !== "root") as string[]))
+                  } />
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Container>
         <Container>
           <Card sx={{ overflow: "hidden", my: 2 }} variant="outlined">
             <CardHeader title="Transactions" />

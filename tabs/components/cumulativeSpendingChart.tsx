@@ -27,10 +27,8 @@ export const CumulativeSpendingChart = ({
       { id: date.format(DATE_FORMAT), date, sum: lastSum + sumOfDay }
     ]
   }, [] as { date: Moment, sum: number }[])
-
   return (
     <ResponsiveLine
-      onMouseMove={console.log}
       data={[
         { id: "main", data: data.map(({ date, sum }) => ({ x: date.format(DATE_FORMAT), y: sum })) }
       ]}
@@ -51,15 +49,12 @@ export const CumulativeSpendingChart = ({
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 30,
-        legend: 'date',
-        legendOffset: 36,
-        legendPosition: 'middle'
       }}
       axisLeft={{
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: '$',
+        legend: 'Dollars spent',
         legendOffset: -40,
         legendPosition: 'middle'
       }}
