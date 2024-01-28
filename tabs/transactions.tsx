@@ -13,7 +13,7 @@ import moment from "moment";
 import _ from "lodash";
 import { AccountTypeIcon } from "~common/components/AccountTypeIcon";
 import { DATE_FORMAT } from "~common/utils/constants";
-import { CumulativeSpendingChart } from "./components/cumulativeSpendingChart";
+import { CumulativeSpendingChart } from "./components/CumulativeSpendingChart";
 import { CategorySunburst } from "./components/CategorySunBurst";
 import { PlaidAccount } from "~common/plaidTypes";
 import { ChevronRight } from "@mui/icons-material";

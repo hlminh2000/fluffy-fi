@@ -1,6 +1,5 @@
-import { Category } from "@mui/icons-material";
 import type { PlaidTransaction } from "~common/plaidTypes";
-import { computeCategorySunburstData } from "~tabs/transactions";
+import { computeCategorySunburstData } from "../tabs/components/computeCategorySunburstData";
 
 const transactions: Partial<PlaidTransaction>[] = [
   {

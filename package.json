@@ -9,7 +9,7 @@
     "dev-ff": "plasmo dev --target=firefox-mv2 --verbose",
     "build": "plasmo build",
     "build-ff": "plasmo build --target=firefox-mv2",
-    "test": "plasmo test",
+    "test": "jest",
     "package": "plasmo package"
   },
   "dependencies": {

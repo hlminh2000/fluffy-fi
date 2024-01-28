@@ -34,6 +34,9 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Run test
+        run: pnpm test
       
       - name: Build a debuggable package
         run: pnpm build --target=${{matrix.target}} --source-maps --bundle-buddy --no-minify --tag=debug-${{github.sha}} -- --zip
