@@ -69,17 +69,15 @@ export default () => {
       await transactionDb.createIndex({
         index: { fields: ["date", "account_id", "category"] }
       })
-      const selector = {
-        $and: [
-          { date: { $gte: serializedDateRange.startDate } },
-          { date: { $lte: serializedDateRange.endDate } },
-          { account_id: { $in: selectedAccounts } },
-          ...categoryFilter.map(category => ({ category: { $elemMatch: { $eq: category } } }))
-        ]
-      }
-      console.log("selector: ", selector)
       return transactionDb.find({
-        selector,
+        selector: {
+          $and: [
+            { date: { $gte: serializedDateRange.startDate } },
+            { date: { $lte: serializedDateRange.endDate } },
+            { account_id: { $in: selectedAccounts } },
+            ...categoryFilter.map(category => ({ category: { $elemMatch: { $eq: category } } }))
+          ]
+        },
         sort: [{ date: "desc" }]
       }).then(result => result.docs)
     },
