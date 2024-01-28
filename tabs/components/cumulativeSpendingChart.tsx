@@ -40,7 +40,7 @@ export const CumulativeSpendingChart = ({
         type: 'linear',
         min: 'auto',
         max: 'auto',
-        stacked: true,
+        stacked: false,
         reverse: false
       }}
       yFormat=" >-.2f"
@@ -63,14 +63,14 @@ export const CumulativeSpendingChart = ({
         legendOffset: -40,
         legendPosition: 'middle'
       }}
-      pointSize={10}
+      pointSize={5}
       pointColor={{ theme: 'background' }}
       pointBorderWidth={2}
       pointBorderColor={{ from: 'serieColor' }}
       pointLabelYOffset={-12}
       enableArea={true}
-      areaBaselineValue={60}
-      areaOpacity={1}
+      areaBaselineValue={0}
+      areaOpacity={0.5}
       useMesh={true}
       legends={[
         {
