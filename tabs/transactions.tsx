@@ -107,11 +107,6 @@ export default () => {
     <FluffyThemeProvider>
       <LoginGate>
         <Box pt={4}>
-          <Box position={"fixed"} bottom={50} right={50}>
-            <Fab color="primary" onClick={onSyncClick} disabled={syncing}>
-              <SyncIcon />
-            </Fab>
-          </Box>
           <Container>
             <FormControl fullWidth>
               <InputLabel id="accounts">Accounts</InputLabel>
@@ -132,7 +127,7 @@ export default () => {
                         label={accountIndex[accountId]?.name}
                       />
                     ))}
-                  </Box>
+                  </Box>  
                 )}
               >
                 {accounts?.map((account) => (
@@ -171,7 +166,7 @@ export default () => {
                         </Box>
                       </Box>
                     }
-                  ></CardHeader>
+                  />
                   <Modal open={open} >
                     <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center">
                       <Paper sx={{ width: "690px", overflow: "hidden" }}>
@@ -261,6 +256,11 @@ export default () => {
             </CardContent>
           </Card>
         </Container>
+        <Box position={"fixed"} bottom={30} right={30}>
+          <Fab color="primary" onClick={onSyncClick} disabled={syncing}>
+            <SyncIcon />
+          </Fab>
+        </Box>
       </LoginGate>
     </FluffyThemeProvider>
   )
