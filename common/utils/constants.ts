@@ -1,6 +1,7 @@
 export enum STORAGE_KEY {
   passwordHash = "passwordHash",
   lastLoginTime = "lastLoginTime",
+  lastLogOutTime = "lastLogOutTime",
   sessionTimeoutMinutes = 'sessionTimeoutMinutes',
   colorTheme = "colorTheme",
   currentSetupStep = "currentSetupStep",

@@ -19,6 +19,7 @@ export const passwordCache = (() => {
     ) || DEFAULT_SESSION_TIMEOUT_MINUTES
     timeout = setTimeout(async () => {
       setPassword(null)
+      await storage.set(STORAGE_KEY.lastLogOutTime, Date.now())
       await heartbeat.stopHeartbeat()
     }, sessionTimeoutMinutes * 60000)
   }
