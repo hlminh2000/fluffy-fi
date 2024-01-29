@@ -3,31 +3,32 @@ import { DEFAULT_SESSION_TIMEOUT_MINUTES, STORAGE_KEY } from "~common/utils/cons
 import { createHeartbeat } from "./heartBeat";
 
 export const passwordCache = (() => {
-  let _sessionPassword: string | null = null
+  let _password: string | null = null
   let _longTermCache: string | null = null
   let timeout: ReturnType<typeof setTimeout> | null = null;
   const storage = new Storage();
-  const heartbeat = createHeartbeat("sessionCache");
+  const heartBeat = createHeartbeat("screenlock");
 
   const setPassword = async (password: string | null) => {
-    _longTermCache = password;
-    _sessionPassword = password;
+    _password = password;
+    _longTermCache = password
     if (timeout) clearTimeout(timeout)
-    await heartbeat.startHeartbeat()
+    await heartBeat.startHeartbeat()
     const sessionTimeoutMinutes = Number(
       await storage.get(STORAGE_KEY.sessionTimeoutMinutes)
     ) || DEFAULT_SESSION_TIMEOUT_MINUTES
+    const timeoutMiliseconds = sessionTimeoutMinutes * 60000
     timeout = setTimeout(async () => {
-      setPassword(null)
       await storage.set(STORAGE_KEY.lastLogOutTime, Date.now())
-      await heartbeat.stopHeartbeat()
-    }, sessionTimeoutMinutes * 60000)
+      await heartBeat.stopHeartbeat()
+      setPassword(null)
+    }, timeoutMiliseconds)
   }
 
   return {
-    isPasswordSet: () => _sessionPassword !== null,
+    isPasswordSet: () => _password !== null,
     setPassword,
-    getPassword: () => _sessionPassword,
+    getPassword: () => _password,
     getLongTermCache: () => _longTermCache,
   }
 })()

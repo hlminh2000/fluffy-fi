@@ -13,6 +13,7 @@ import { LoginGate } from "~common/components/LoginGate";
 import { ConnectionSettings } from "./components/ConnectionSettings";
 import { SecuritySettings } from "./components/SecuritySettings";
 import { AppearanceSettings } from "./components/AppearanceSettings";
+import { PasswordGate } from "~common/components/PasswordGate";
 
 function IndexPopup() {
 
@@ -21,7 +22,7 @@ function IndexPopup() {
 
   return (
     <FluffyThemeProvider>
-      <LoginGate>
+      <PasswordGate>
         <FluffyBackground sx={{
           height: "100vh",
           overflowY: "scroll",
@@ -44,7 +45,7 @@ function IndexPopup() {
             </Container>
           </Box>
         </FluffyBackground>
-      </LoginGate>
+      </PasswordGate>
     </FluffyThemeProvider>
   )
 }

@@ -56,7 +56,7 @@ export const CumulativeSpendingChart = ({
         tickRotation: 0,
         legend: 'Dollars spent',
         legendOffset: -40,
-        legendPosition: 'middle'
+        legendPosition: 'middle',
       }}
       pointSize={5}
       pointColor={{ theme: 'background' }}

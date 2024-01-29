@@ -22,9 +22,9 @@ export const useLoginSession = () => {
   const [ cachedPassword, setCachedPassword ] = useState<string>(null)
   const { isPasswordValid, isPasswordSet } = usePasswordHash();
   const [loading, setLoading] = useState(false)
-  const lastLogOutTime = useStorage({
+  const [lastLogOutTime] = useStorage({
     key: STORAGE_KEY.lastLogOutTime,
-    instance: new Storage({area: "local"})
+    instance: new Storage()
   })
   useEffect(() => {
     const getCachedPassword = async () => {

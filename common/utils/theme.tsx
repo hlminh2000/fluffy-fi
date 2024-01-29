@@ -6,12 +6,20 @@ import { useColorThemeSetting } from "./settingsHooks";
 export const FluffyThemeProvider = ({ children }) => {
   const lightTheme = createTheme({
     palette: {
-      mode: "light"
+      mode: "light",
+      primary: {
+        main: "#44D1A7",
+        contrastText: "#FFFFFF"
+      }
     }
   })
   const darkTheme = createTheme({
     palette: {
-      mode: "dark"
+      mode: "dark",
+      primary: {
+        main: "#44D1A7",
+        contrastText: "#FFFFFF"
+      }
     }
   })
   const { colorTheme, options } = useColorThemeSetting()

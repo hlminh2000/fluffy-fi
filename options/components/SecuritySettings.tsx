@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
   Box,
   Button,
@@ -55,6 +55,9 @@ export const SecuritySettings = () => {
 
   const [sessionTimeout, setSessionTimeout] = useStorage<number>(STORAGE_KEY.sessionTimeoutMinutes);
   const [sessionTimeoutInput, setSessionTimeoutInput] = useState(sessionTimeout || DEFAULT_SESSION_TIMEOUT_MINUTES);
+  useEffect(() => {
+    if (sessionTimeout) setSessionTimeoutInput(sessionTimeout)
+  }, [sessionTimeout])
   const onSessionTimeoutInputChange: React.ComponentProps<typeof TextField>['onChange'] =
     e => setSessionTimeoutInput(Number(e.target.value))
   const onSessionTimeoutSave: React.ComponentProps<typeof Button>['onClick'] =

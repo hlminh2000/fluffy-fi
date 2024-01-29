@@ -32,7 +32,7 @@ export const AppearanceSettings = () => {
               <MenuItem value={options.system}>Match system settings</MenuItem>
             </Select>
           }>
-            <ListItemIcon><Brightness4Icon /></ListItemIcon>
+            <ListItemIcon><Brightness4Icon color="primary" /></ListItemIcon>
             <ListItemText primary="Theme" secondary="Light or dark mode" />
           </ListItem>
         </List>

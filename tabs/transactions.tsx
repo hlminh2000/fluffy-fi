@@ -1,5 +1,5 @@
 // import "https://cdn.plaid.com/link/v2/stable/link-initialize.js"
-import { Avatar, Box, Button, Card, CardContent, CardHeader, Chip, Container, Divider, Fab, FormControl, GlobalStyles, Grid, IconButton, InputLabel, List, ListItem, ListItemIcon, ListItemText, MenuItem, Modal, OutlinedInput, Paper, Select, Skeleton, Tab, Tabs, useTheme } from "@mui/material"
+import { AppBar, Avatar, Box, Button, Card, CardContent, CardHeader, Chip, Container, Divider, Fab, FormControl, GlobalStyles, Grid, IconButton, Input, InputLabel, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Modal, OutlinedInput, Paper, Select, Skeleton, SwipeableDrawer, Tab, Tabs, TextField, Toolbar, Typography, useTheme } from "@mui/material"
 import { FluffyThemeProvider } from "~common/utils/theme"
 import { sendToBackground } from "@plasmohq/messaging";
 import { LoginGate } from "~common/components/LoginGate";
@@ -18,7 +18,8 @@ import { CategorySunburst } from "./components/CategorySunBurst";
 import { PlaidAccount } from "~common/plaidTypes";
 import { Cancel, ChevronRight } from "@mui/icons-material";
 import { CashflowChart } from "./components/CashflowChart";
-
+import MenuIcon from '@mui/icons-material/Menu';
+import { PasswordGate } from "~common/components/PasswordGate";
 
 export default () => {
 
@@ -104,11 +105,49 @@ export default () => {
 
   const transactionByDates = _.groupBy(transactions, t => moment(t.date).format(DATE_FORMAT))
 
-  const [selectedTrendTab, setSelectedTrendTab] = useState<0 | 1>(0);
+  const [selectedTrendTab, setSelectedTrendTab] = useState<0 | 1>(0)
+
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   return (
     <FluffyThemeProvider>
-      <LoginGate>
+      <PasswordGate>
+        <AppBar position="sticky">
+          <Toolbar variant="dense">
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              sx={{ mr: 2 }}
+              onClick={() => setDrawerOpen(true)}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Toolbar>
+          <SwipeableDrawer
+            anchor={"left"}
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            onOpen={() => setDrawerOpen(true)}
+          >
+            <Box
+              width="250"
+              role="presentation"
+              onClick={() => setDrawerOpen(false)}
+              onKeyDown={() => setDrawerOpen(false)}
+            >
+              <List>
+                <ListItemButton>
+                  <ListItemText primary={"Hello"} />
+                </ListItemButton>
+                <ListItemButton>
+                  <ListItemText primary={"World"} />
+                </ListItemButton>
+              </List>
+            </Box>
+          </SwipeableDrawer>
+        </AppBar>
+
         <Box pt={4}>
           <Container>
             <FormControl fullWidth>
@@ -130,7 +169,7 @@ export default () => {
                         label={accountIndex[accountId]?.name}
                       />
                     ))}
-                  </Box>  
+                  </Box>
                 )}
               >
                 {accounts?.map((account) => (
@@ -210,7 +249,7 @@ export default () => {
                       ? categoryFilter.map((c, i) => (
                         <React.Fragment key={`${c}-${i}`}>
                           {i !== 0 && <ChevronRight sx={{ mt: 1 }} />}
-                          <Chip label={c} size="small" sx={{ mt: 1 }} deleteIcon={<Cancel />} onDelete={() => setCategoryFilter(categoryFilter.slice(0, i))} />
+                          <Chip color="primary" label={c} size="small" sx={{ mt: 1 }} deleteIcon={<Cancel />} onDelete={() => setCategoryFilter(categoryFilter.slice(0, i))} />
                         </React.Fragment>
                       ))
                       : "All"}
@@ -271,7 +310,7 @@ export default () => {
             <SyncIcon />
           </Fab>
         </Box>
-      </LoginGate>
+      </PasswordGate>
     </FluffyThemeProvider>
   )
 }
