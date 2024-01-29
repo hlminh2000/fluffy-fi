@@ -199,6 +199,27 @@ export default () => {
         </Box>
         <Container>
           <Grid container spacing={2} pt={2}>
+            <Grid item xs={12} md={4}>
+              <Card variant="outlined" sx={{ width: "100%", minHeight: "100%" }}>
+                <CardHeader title="Categories" subheader={
+                  <Box display={"flex"} flexDirection={"row"} alignItems={"center"} flexWrap={"wrap"}>
+                    {!!categoryFilter.length
+                      ? categoryFilter.map((c, i) => (
+                        <React.Fragment key={`${c}-${i}`}>
+                          {i !== 0 && <ChevronRight sx={{ mt: 1 }} />}
+                          <Chip label={c} size="small" sx={{ mt: 1 }} deleteIcon={<Cancel />} onDelete={() => setCategoryFilter(categoryFilter.slice(0, i))} />
+                        </React.Fragment>
+                      ))
+                      : "All"}
+                  </Box>
+                } />
+                <CardContent sx={{ height: "400px" }}>
+                  <CategorySunburst transactions={spendings} onClick={({ path }) =>
+                    setCategoryFilter(reverse(path.filter(p => p !== "root") as string[]))
+                  } />
+                </CardContent>
+              </Card>
+            </Grid>
             <Grid item xs={12} md={8}>
               <Card variant="outlined" sx={{ width: "100%", minHeight: "100%" }}>
                 <CardHeader title="Trends"
@@ -243,27 +264,6 @@ export default () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} md={4}>
-              <Card variant="outlined" sx={{ width: "100%", minHeight: "100%" }}>
-                <CardHeader title="Categories" subheader={
-                  <Box display={"flex"} flexDirection={"row"} alignItems={"center"} flexWrap={"wrap"}>
-                    {!!categoryFilter.length
-                      ? categoryFilter.map((c, i) => (
-                        <React.Fragment key={`${c}-${i}`}>
-                          {i !== 0 && <ChevronRight sx={{ mt: 1 }} />}
-                          <Chip color="primary" label={c} size="small" sx={{ mt: 1 }} deleteIcon={<Cancel />} onDelete={() => setCategoryFilter(categoryFilter.slice(0, i))} />
-                        </React.Fragment>
-                      ))
-                      : "All"}
-                  </Box>
-                } />
-                <CardContent sx={{ height: "400px" }}>
-                  <CategorySunburst transactions={spendings} onClick={({ path }) =>
-                    setCategoryFilter(reverse(path.filter(p => p !== "root") as string[]))
-                  } />
-                </CardContent>
-              </Card>
-            </Grid>
           </Grid>
         </Container>
         <Container>
@@ -295,7 +295,16 @@ export default () => {
                                 <ListItemIcon>
                                   <Avatar src={doc.logo_url}>{doc.name[0]}</Avatar>
                                 </ListItemIcon>
-                                <ListItemText primary={doc.name} secondary={doc.category.join(" > ")} />
+                                <ListItemText primary={doc.name} secondary={
+                                  <Box display="flex" alignItems="center" flexDirection="row">
+                                    {doc.category.map((c, i) => (
+                                      <>
+                                        {i > 0 && <ChevronRight />}
+                                        <Chip label={c} size="small" />
+                                      </>
+                                    ))}
+                                  </Box>
+                                } />
                               </ListItem>
                             </React.Fragment>
                           ))

@@ -32,7 +32,7 @@ export const CumulativeSpendingChart = ({
       data={[
         { id: "main", data: data.map(({ date, sum }) => ({ x: date.format(DATE_FORMAT), y: sum })) }
       ]}
-      margin={{ top: 10, right: 130, bottom: 50, left: 50 }}
+      margin={{ top: 5, right: 130, bottom: 50, left: 50 }}
       xScale={{ type: 'point' }}
       yScale={{
         type: 'linear',
