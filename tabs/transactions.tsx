@@ -14,11 +14,11 @@ import groupBy from "lodash/groupBy";
 import reverse from "lodash/reverse";
 import { AccountTypeIcon } from "~common/components/AccountTypeIcon";
 import { DATE_FORMAT } from "~common/utils/constants";
-import { CumulativeSpendingChart } from "./components/CumulativeSpendingChart";
-import { CategorySunburst } from "./components/CategorySunBurst";
+import { CumulativeSpendingChart } from "~tabs/components/CumulativeSpendingChart";
+import { CategorySunburst } from "~tabs/components/CategorySunBurst";
+import { CashflowChart } from "~tabs/components/CashflowChart";
 import { PlaidAccount } from "~common/plaidTypes";
 import { Cancel, ChevronRight } from "@mui/icons-material";
-import { CashflowChart } from "./components/CashflowChart";
 import MenuIcon from '@mui/icons-material/Menu';
 import { PasswordGate } from "~common/components/PasswordGate";
 
