@@ -1,5 +1,5 @@
 import { ResponsiveBar } from "@nivo/bar";
-import _ from "lodash";
+import sumBy from "lodash/sumBy";
 import moment, { Moment } from "moment";
 import { PlaidTransaction } from "~common/plaidTypes";
 import { DATE_FORMAT } from "~common/utils/constants";
@@ -20,8 +20,8 @@ export const CashflowChart = ({
   const dates = datesInRange(fromDate, toDate);
   const data = dates.map(date => {
     const transactionsOnDate = transactions.filter(t => moment(t.date).isSame(date, "day"))
-    const inflow = -_.sumBy(transactionsOnDate.filter(t => t.amount < 0), "amount")
-    const outflow = -_.sumBy(transactionsOnDate.filter(t => t.amount > 0), "amount")
+    const inflow = - sumBy(transactionsOnDate.filter(t => t.amount < 0), "amount")
+    const outflow = - sumBy(transactionsOnDate.filter(t => t.amount > 0), "amount")
     return { id: date.format(DATE_FORMAT), inflow, outflow }
   })
 

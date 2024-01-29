@@ -10,7 +10,8 @@ import SyncIcon from '@mui/icons-material/Sync';
 import EditIcon from '@mui/icons-material/Edit';
 import { DateRangePicker } from "mui-daterange-picker";
 import moment from "moment";
-import _ from "lodash";
+import groupBy from "lodash/groupBy";
+import reverse from "lodash/reverse";
 import { AccountTypeIcon } from "~common/components/AccountTypeIcon";
 import { DATE_FORMAT } from "~common/utils/constants";
 import { CumulativeSpendingChart } from "./components/CumulativeSpendingChart";
@@ -103,7 +104,7 @@ export default () => {
     investment: "success" as "success",
   }[account?.type] || "default" as "default")
 
-  const transactionByDates = _.groupBy(transactions, t => moment(t.date).format(DATE_FORMAT))
+  const transactionByDates = groupBy(transactions, t => moment(t.date).format(DATE_FORMAT))
 
   const [selectedTrendTab, setSelectedTrendTab] = useState<0 | 1>(0)
 
@@ -257,7 +258,7 @@ export default () => {
                 } />
                 <CardContent sx={{ height: "400px" }}>
                   <CategorySunburst transactions={spendings} onClick={({ path }) =>
-                    setCategoryFilter(_.reverse(path.filter(p => p !== "root") as string[]))
+                    setCategoryFilter(reverse(path.filter(p => p !== "root") as string[]))
                   } />
                 </CardContent>
               </Card>
