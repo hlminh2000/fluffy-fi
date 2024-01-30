@@ -272,6 +272,17 @@ export default () => {
           <Card sx={{ overflow: "hidden", my: 2 }} variant="outlined">
             <CardHeader title="Transactions" />
             <CardContent>
+              <Modal open={!!editingTransaction} onClose={() => setEditingTransaction(null)}>
+                <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center">
+                  <Card>
+                    <CardHeader title={editingTransaction?.name} />
+                    <Divider />
+                    <CardContent>
+                      <pre style={{ height: 500, overflowY: "scroll" }}>{JSON.stringify(editingTransaction, null, 2)}</pre>
+                    </CardContent>
+                  </Card>
+                </Box>
+              </Modal>
               <List>
                 {loading
                   ? <Skeleton variant="rectangular" width={"100%"} height={300} />
@@ -284,17 +295,6 @@ export default () => {
                         </ListItemText>
                       </ListItem>
                       <Divider />
-                      <Modal open={!!editingTransaction} onClose={() => setEditingTransaction(null)}>
-                        <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center">
-                          <Paper >
-                            <CardHeader title={editingTransaction?.name} />
-                            <Divider />
-                            <CardContent>
-                              <pre style={{ height: 500, overflowY: "scroll" }}>{JSON.stringify(editingTransaction, null, 2)}</pre>
-                            </CardContent>
-                          </Paper>
-                        </Box>
-                      </Modal>
                       {
                         (transactionByDates[date.format(DATE_FORMAT)] || [] as typeof transactions)
                           .map((doc, i) => (
