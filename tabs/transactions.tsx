@@ -273,14 +273,16 @@ export default () => {
             <CardHeader title="Transactions" />
             <CardContent>
               <Modal open={!!editingTransaction} onClose={() => setEditingTransaction(null)}>
-                <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center">
-                  <Card>
-                    <CardHeader title={editingTransaction?.name} />
-                    <Divider />
-                    <CardContent>
-                      <pre style={{ height: 500, overflowY: "scroll" }}>{JSON.stringify(editingTransaction, null, 2)}</pre>
-                    </CardContent>
-                  </Card>
+                <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center" onClick={() => setEditingTransaction(null)}>
+                  <Box onClick={e => e.stopPropagation()}>
+                    <Card >
+                      <CardHeader title={editingTransaction?.name} />
+                      <Divider />
+                      <CardContent>
+                        <pre style={{ height: 500, overflowY: "scroll" }}>{JSON.stringify(editingTransaction, null, 2)}</pre>
+                      </CardContent>
+                    </Card>
+                  </Box>
                 </Box>
               </Modal>
               <List>
