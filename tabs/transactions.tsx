@@ -111,6 +111,8 @@ export default () => {
 
   const [drawerOpen, setDrawerOpen] = useState(false)
 
+  const [editingTransaction, setEditingTransaction] = useState<typeof transactions[number]>(null)
+
   return (
     <FluffyThemeProvider>
       <PasswordGate>
@@ -282,6 +284,17 @@ export default () => {
                         </ListItemText>
                       </ListItem>
                       <Divider />
+                      <Modal open={!!editingTransaction} onClose={() => setEditingTransaction(null)}>
+                        <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center">
+                          <Paper >
+                            <CardHeader title={editingTransaction?.name} />
+                            <Divider />
+                            <CardContent>
+                              <pre style={{ height: 500, overflowY: "scroll" }}>{JSON.stringify(editingTransaction, null, 2)}</pre>
+                            </CardContent>
+                          </Paper>
+                        </Box>
+                      </Modal>
                       {
                         (transactionByDates[date.format(DATE_FORMAT)] || [] as typeof transactions)
                           .map((doc, i) => (
@@ -290,6 +303,7 @@ export default () => {
                               <ListItem secondaryAction={
                                 <ListItemText sx={{ color: doc.amount < 0 ? theme.palette.success.main : "inherit" }}>
                                   ${(- doc.amount).toFixed(2)}
+                                  <IconButton size="small" onClick={() => setEditingTransaction(doc)}><EditIcon /></IconButton>
                                 </ListItemText>
                               }>
                                 <ListItemIcon>
