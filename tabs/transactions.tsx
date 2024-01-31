@@ -5,7 +5,7 @@ import { sendToBackground } from "@plasmohq/messaging";
 import { LoginGate } from "~common/components/LoginGate";
 import { useAsync } from "react-async-hook";
 import { transactionDb, balanceDb } from "~common/PouchDbs";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { ComponentProps, useEffect, useMemo, useState } from "react";
 import SyncIcon from '@mui/icons-material/Sync';
 import EditIcon from '@mui/icons-material/Edit';
 import { DateRangePicker } from "mui-daterange-picker";
@@ -18,10 +18,49 @@ import { DATE_FORMAT } from "~common/utils/constants";
 import { CumulativeSpendingChart } from "~tabs/components/CumulativeSpendingChart";
 import { CategorySunburst } from "~tabs/components/CategorySunBurst";
 import { CashflowChart } from "~tabs/components/CashflowChart";
-import { PlaidAccount } from "~common/plaidTypes";
-import { Cancel, ChevronRight } from "@mui/icons-material";
+import { PlaidAccount, PlaidTransaction } from "~common/plaidTypes";
+import { Abc, CalendarMonth, Cancel, ChevronRight, Shop } from "@mui/icons-material";
 import MenuIcon from '@mui/icons-material/Menu';
 import { PasswordGate } from "~common/components/PasswordGate";
+
+const displayNumber = (num: number) => isNaN(num) ? "" : `$${num.toLocaleString("US", { minimumFractionDigits: 2 })}`
+
+const TransactionModal = (props: { transaction?: PlaidTransaction, onClose: () => any }) => {
+  const { transaction, onClose } = props;
+  const [temporaryData, setTemporaryData] = useState(transaction)
+  useEffect(() => setTemporaryData(transaction), [transaction])
+
+  const {result: account} = useAsync(async () => balanceDb.get(transaction?.account_id), [transaction])
+
+  return (
+    <Modal open={!!transaction} onClose={onClose}>
+      <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center" onClick={onClose}>
+        <Box onClick={e => e.stopPropagation()}>
+          <Card sx={{minWidth: 500}}>
+            <CardHeader title={displayNumber(transaction?.amount)} subheader={account?.name} />
+            <Divider />
+            <CardContent>
+              <List>
+                <ListItem secondaryAction={<TextField type="date" size="small" label={"Merchant"} value={temporaryData?.date} />}>
+                  <ListItemIcon><CalendarMonth color="primary"/></ListItemIcon>
+                  <ListItemText>Date</ListItemText>
+                </ListItem>
+                <ListItem secondaryAction={<TextField size="small" label={"Name"} value={temporaryData?.name} />}>
+                  <ListItemIcon><Abc color="primary"/></ListItemIcon>
+                  <ListItemText>Name</ListItemText>
+                </ListItem>
+                <ListItem secondaryAction={<TextField size="small" label={"Merchant"} value={temporaryData?.merchant_name} />}>
+                  <ListItemIcon><Shop color="primary"/></ListItemIcon>
+                  <ListItemText>Merchant</ListItemText>
+                </ListItem>
+              </List>
+            </CardContent>
+          </Card>
+        </Box>
+      </Box>
+    </Modal>
+  )
+}
 
 export default () => {
 
@@ -103,7 +142,7 @@ export default () => {
     credit: "warning" as "warning",
     loan: "warning" as "warning",
     investment: "success" as "success",
-  }[account?.type] || "default" as "default")
+  }[account?.type] || "info" as "info")
 
   const transactionByDates = groupBy(transactions, t => moment(t.date).format(DATE_FORMAT))
 
@@ -272,19 +311,7 @@ export default () => {
           <Card sx={{ overflow: "hidden", my: 2 }} variant="outlined">
             <CardHeader title="Transactions" />
             <CardContent>
-              <Modal open={!!editingTransaction} onClose={() => setEditingTransaction(null)}>
-                <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center" onClick={() => setEditingTransaction(null)}>
-                  <Box onClick={e => e.stopPropagation()}>
-                    <Card >
-                      <CardHeader title={editingTransaction?.name} />
-                      <Divider />
-                      <CardContent>
-                        <pre style={{ height: 500, overflowY: "scroll" }}>{JSON.stringify(editingTransaction, null, 2)}</pre>
-                      </CardContent>
-                    </Card>
-                  </Box>
-                </Box>
-              </Modal>
+              <TransactionModal transaction={editingTransaction} onClose={() => setEditingTransaction(null)} />
               <List>
                 {loading
                   ? <Skeleton variant="rectangular" width={"100%"} height={300} />
@@ -304,7 +331,7 @@ export default () => {
                               {i !== 0 && <Divider variant="inset" />}
                               <ListItem secondaryAction={
                                 <ListItemText sx={{ color: doc.amount < 0 ? theme.palette.success.main : "inherit" }}>
-                                  ${(- doc.amount).toFixed(2)}
+                                  {displayNumber(-doc.amount)}
                                   <IconButton size="small" onClick={() => setEditingTransaction(doc)}><EditIcon /></IconButton>
                                 </ListItemText>
                               }>
