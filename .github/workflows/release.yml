@@ -117,13 +117,34 @@ jobs:
           ZIP_FILES=("chrome-${{ inputs.tag }}.zip" "firefox-${{ inputs.tag }}.zip" "edge-${{ inputs.tag }}.zip")
           
           for zip_file in "${ZIP_FILES[@]}"; do
+            # Check if the zip file exists
+            if [ ! -f "$zip_file" ]; then
+              echo "$zip_file does not exist, skipping..."
+              continue
+            fi
+            
+            # Extract manifest.json content to a variable
+            manifest_content=$(unzip -p "$zip_file" manifest.json)
+
+            # Check if manifest.json was successfully extracted
+            if [ -z "$manifest_content" ]; then
+              echo "manifest.json not found in $zip_file, skipping..."
+              continue
+            fi
 
             # Modify the version in the extracted manifest.json content
-            $(unzip -p "$zip_file" manifest.json) | jq -c --arg version "${{ inputs.tag }}" '.version = $version' > manifest.json
+            modified_manifest=$(echo "$manifest_content" | jq -c --arg version "${{ inputs.tag }}" '.version = $version')
+
+            # Save the modified manifest to a monifest.json
+            echo "$modified_manifest" > manifest.json
 
             # Update the existing zip file with the modified manifest.json
             zip -u "$zip_file" manifest.json
 
+            # Remove the modified manifest file
+            rm manifest.json
+
+            echo "Updated version in $zip_file to ${{ inputs.tag }}"
           done
 
       - name: Create pre-release release
