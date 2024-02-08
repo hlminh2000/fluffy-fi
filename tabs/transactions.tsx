@@ -1,5 +1,5 @@
 // import "https://cdn.plaid.com/link/v2/stable/link-initialize.js"
-import { AppBar, Avatar, Box, Button, Card, CardContent, CardHeader, Chip, Container, Divider, Fab, FormControl, GlobalStyles, Grid, IconButton, Input, InputLabel, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Modal, OutlinedInput, Paper, Select, Skeleton, SwipeableDrawer, Tab, Tabs, TextField, Toolbar, Typography, useTheme } from "@mui/material"
+import { AppBar, Autocomplete, Avatar, Box, Button, Card, CardActionArea, CardActions, CardContent, CardHeader, Chip, Container, Divider, Fab, FormControl, GlobalStyles, Grid, IconButton, Input, InputLabel, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Modal, OutlinedInput, Paper, Select, Skeleton, SwipeableDrawer, Tab, Tabs, TextField, Toolbar, Typography, useTheme } from "@mui/material"
 import { FluffyThemeProvider } from "~common/utils/theme"
 import { sendToBackground } from "@plasmohq/messaging";
 import { LoginGate } from "~common/components/LoginGate";
@@ -25,19 +25,30 @@ import { PasswordGate } from "~common/components/PasswordGate";
 
 const displayNumber = (num: number) => isNaN(num) ? "" : `$${num.toLocaleString("US", { minimumFractionDigits: 2 })}`
 
-const TransactionModal = (props: { transaction?: PlaidTransaction, onClose: () => any }) => {
+const TransactionModal = (props: { transaction: PlaidTransaction | null, onClose: () => any, onSave: (t: PlaidTransaction) => any }) => {
   const { transaction, onClose } = props;
+  const [saveEnabled, setSaveEnabled] = useState(true);
   const [temporaryData, setTemporaryData] = useState(transaction)
   useEffect(() => setTemporaryData(transaction), [transaction])
 
-  const {result: account} = useAsync(async () => balanceDb.get(transaction?.account_id), [transaction])
+  const {result: account} = useAsync(async () => balanceDb.get(transaction?.account_id || ""), [transaction])
+
+  const changed = _.isEqual(transaction, temporaryData)
+
+  const onSave = async () => {
+    if (temporaryData){
+      setSaveEnabled(false);
+      await props.onSave(temporaryData);
+      setSaveEnabled(true);
+    }
+  }
 
   return (
     <Modal open={!!transaction} onClose={onClose}>
       <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center" onClick={onClose}>
         <Box onClick={e => e.stopPropagation()}>
           <Card sx={{minWidth: 500}}>
-            <CardHeader title={displayNumber(transaction?.amount)} subheader={account?.name} />
+            <CardHeader title={displayNumber(transaction?.amount || 0)} subheader={account?.name} />
             <Divider />
             <CardContent>
               <List>
@@ -49,12 +60,23 @@ const TransactionModal = (props: { transaction?: PlaidTransaction, onClose: () =
                   <ListItemIcon><Abc color="primary"/></ListItemIcon>
                   <ListItemText>Name</ListItemText>
                 </ListItem>
-                <ListItem secondaryAction={<TextField size="small" label={"Merchant"} value={temporaryData?.merchant_name} />}>
+                <ListItem secondaryAction={
+                  <Autocomplete
+                    size="small"
+                    value={temporaryData?.merchant_name}
+                    renderInput={props => <TextField {...props} label={"Merchant"} />} 
+                    options={[]}
+                  />
+                }>
                   <ListItemIcon><Shop color="primary"/></ListItemIcon>
                   <ListItemText>Merchant</ListItemText>
                 </ListItem>
               </List>
             </CardContent>
+            <Divider />
+            <CardActions sx={{display: "flex", flexDirection: "row-reverse"}}>
+              <Button variant="contained" onClick={onSave} disabled={!saveEnabled || !changed}>Save</Button>
+            </CardActions>
           </Card>
         </Box>
       </Box>
@@ -91,12 +113,15 @@ export default () => {
   const { result: accounts, execute: syncBalances } = useAsync(
     async () => {
       const result = await balanceDb.allDocs({ include_docs: true });
-      return result.rows.map(({ doc }) => doc)
+      return result.rows.map(({ doc }) => doc as NonNullable<typeof doc>)
     },
     []
   )
   const accountIndex = useMemo(
-    () => accounts?.reduce((acc, a) => ({ ...acc, [a.account_id]: a }), {} as { [id: string]: typeof accounts[0] }) || [] as typeof accounts,
+    () => accounts?.reduce(
+      (acc, a) => ({ ...acc, [a.account_id]: a }), 
+      {} as { [id: string]: typeof accounts[number] }
+    ) || [] as NonNullable<typeof accounts>,
     [accounts]
   )
 
@@ -134,7 +159,7 @@ export default () => {
 
   const spendings = (transactions
     ?.filter(t => !["Transfer"].some(category => t.category.includes(category)))
-    || [] as typeof transactions
+    || [] as NonNullable<typeof transactions>
   )
 
   const accountColor = (account: PlaidAccount) => ({
@@ -150,7 +175,7 @@ export default () => {
 
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  const [editingTransaction, setEditingTransaction] = useState<typeof transactions[number]>(null)
+  const [editingTransaction, setEditingTransaction] = useState<PlaidTransaction | null>(null)
 
   return (
     <FluffyThemeProvider>
@@ -286,6 +311,7 @@ export default () => {
                         onChange={e => setDateRange({
                           startDate: moment(e.startDate),
                           endDate: moment(e.endDate),
+                          // @ts-ignore
                           label: e.label
                         })}
                         toggle={toggle}
@@ -311,7 +337,7 @@ export default () => {
           <Card sx={{ overflow: "hidden", my: 2 }} variant="outlined">
             <CardHeader title="Transactions" />
             <CardContent>
-              <TransactionModal transaction={editingTransaction} onClose={() => setEditingTransaction(null)} />
+              <TransactionModal transaction={editingTransaction} onClose={() => setEditingTransaction(null)} onSave={console.log} />
               <List>
                 {loading
                   ? <Skeleton variant="rectangular" width={"100%"} height={300} />

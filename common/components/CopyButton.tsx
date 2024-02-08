@@ -8,7 +8,7 @@ export const useSnackbarState = (timeout = 2000) => {
 
   const [snackbarMessage, setSnackbarMessage] = React.useState<string | null>(null)
   const [messageType, setSnackbarMessageType] = React.useState<"info" | "success" | "error" | "warning">("info")
-  const [timeoutId, setTimeoutId] = React.useState(null);
+  const [timeoutId, setTimeoutId] = React.useState<ReturnType<typeof setTimeout> | null >(null);
 
   const openSnackbar = (message: string, type: typeof messageType = "info") => {
     if (timeoutId) clearTimeout(timeoutId);

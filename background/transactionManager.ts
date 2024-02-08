@@ -14,10 +14,9 @@ export const transactionManager = (() => {
     if (!passwordCache.getLongTermCache()) {
       alert("FluffyFi would like to sync your transactions, please authorize with your PIN");
     }
-    const password = passwordCache.getLongTermCache();
     const [plaidItems, plaidConnection] = await Promise.all([
-      storageVault.get<PlaidItemStorage>(STORAGE_KEY.plaidItems, password),
-      storageVault.get<PlaidConnectionStorage>(STORAGE_KEY.plaidConnection, password)
+      storageVault.get<PlaidItemStorage>(STORAGE_KEY.plaidItems),
+      storageVault.get<PlaidConnectionStorage>(STORAGE_KEY.plaidConnection)
     ]);
     let newTransactionCount = 0;
     let modifiedTransactionCount = 0;

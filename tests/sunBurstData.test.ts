@@ -1,7 +1,7 @@
 import type { PlaidTransaction } from "~common/plaidTypes";
 import { computeCategorySunburstData } from "../tabs/components/computeCategorySunburstData";
 
-const transactions: Partial<PlaidTransaction>[] = [
+const transactions: Parameters<typeof computeCategorySunburstData>[0] = [
   {
     amount: 1,
     category: ["Travel", "Taxi"]

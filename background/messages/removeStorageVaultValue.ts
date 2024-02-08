@@ -1,11 +1,12 @@
 import type { PlasmoMessaging } from "@plasmohq/messaging"
 import { storageVault } from "~background/storageVault"
 
-const handler: PlasmoMessaging.MessageHandler = async (
-  req: { body: { storageKey: string } },
+const handler: PlasmoMessaging.MessageHandler<{ storageKey: string }> = async (
+  req,
   res
 ) => {
   if (!storageVault.isUnlocked()) return res.send({ unlocked: false, success: false })
+  if (!req.body) return res.send({ unlocked: false, success: false })
  
   console.log("removeStorageVaultValue")
   const { storageKey } = req.body

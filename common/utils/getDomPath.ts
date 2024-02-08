@@ -1,5 +1,5 @@
 export const getDomPath = (el: Element) => {
-  var stack = [];
+  var stack: string[] = [];
   while (el.parentNode != null) {
     console.log(el.nodeName);
     var sibCount = 0;
@@ -20,7 +20,7 @@ export const getDomPath = (el: Element) => {
     } else {
       stack.unshift(el.nodeName.toLowerCase());
     }
-    el = el.parentNode;
+    el = el.parentNode as Element;
   }
   return stack.slice(1); // removes the html element
 }

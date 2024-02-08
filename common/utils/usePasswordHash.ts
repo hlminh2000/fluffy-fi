@@ -31,8 +31,8 @@ export const usePasswordHash = () => {
   const isPasswordValid = async (password: string) => {
     const { hash, algo } = storedHash;
     const passwordHash = await computeHash(password, algo)
-    const sameAtIndex = i => hash[i] === passwordHash[i]
-    return hash.every((n, i) => sameAtIndex(i)) && passwordHash.every((n, i) => sameAtIndex(i))
+    const sameAtIndex = i => hash?.[i] === passwordHash[i]
+    return hash?.every((n, i) => sameAtIndex(i)) && passwordHash.every((n, i) => sameAtIndex(i)) || false
   }
 
   return {

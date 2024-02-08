@@ -6,7 +6,7 @@ import { Storage } from "@plasmohq/storage";
 
 export const useStorageVault = <T>(storageKey: string) => {
   const { lastLoginTime, cachedPassword } = useLoginSession();
-  const [value, setValue] = useState<T>(null)
+  const [value, setValue] = useState<T | null>(null)
   const [cipher] = useStorage({
     key: storageKey,
     instance: new Storage()

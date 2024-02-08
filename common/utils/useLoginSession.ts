@@ -19,7 +19,7 @@ const useLastLoginTime = () => {
 
 export const useLoginSession = () => {
   const { lastLoginTime, recordLogin } = useLastLoginTime()
-  const [ cachedPassword, setCachedPassword ] = useState<string>(null)
+  const [ cachedPassword, setCachedPassword ] = useState<string | null>(null)
   const { isPasswordValid, isPasswordSet } = usePasswordHash();
   const [loading, setLoading] = useState(false)
   const [lastLogOutTime] = useStorage({
