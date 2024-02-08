@@ -18,7 +18,6 @@ on:
 
 jobs:
   publish_to_stores:
-    if: false
     name: Publish to ${{ matrix.stores }} store
     runs-on: ubuntu-latest
     strategy:
@@ -29,6 +28,8 @@ jobs:
           # - Firefox
           # - Edge
     steps:
+      - name: Checkout to replace previous files
+        uses: actions/checkout@v4
       - name: Download artifact from commit
         id: download-packages
         uses: dawidd6/action-download-artifact@v3
@@ -78,6 +79,8 @@ jobs:
     name: Create Release ${{ inputs.tag }}
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout to replace previous files
+        uses: actions/checkout@v4
       - name: Download artifact from commit
         id: download-packages
         uses: dawidd6/action-download-artifact@v3
@@ -107,6 +110,21 @@ jobs:
           mv ${{ steps.identify-package.outputs.chrome_package }} ./chrome-${{ inputs.tag }}.zip
           mv ${{ steps.identify-package.outputs.firefox_package }} ./firefox-${{ inputs.tag }}.zip
           mv ${{ steps.identify-package.outputs.edge_package }} ./edge-${{ inputs.tag }}.zip
+
+      - name: Change version in manifest.json
+        run: |
+          # Array of your zip files
+          ZIP_FILES=("chrome-${{ inputs.tag }}.zip" "firefox-${{ inputs.tag }}.zip" "edge-${{ inputs.tag }}.zip")
+          
+          for zip_file in "${ZIP_FILES[@]}"; do
+
+            # Modify the version in the extracted manifest.json content
+            $(unzip -p "$zip_file" manifest.json) | jq -c --arg version "${{ inputs.tag }}" '.version = $version' > manifest.json
+
+            # Update the existing zip file with the modified manifest.json
+            zip -u "$zip_file" manifest.json
+
+          done
 
       - name: Create pre-release release
         id: create-pre-release
