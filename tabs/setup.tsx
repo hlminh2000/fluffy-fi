@@ -11,7 +11,7 @@ import { PasswordGate } from "~common/components/PasswordGate";
 
 export default () => {
 
-  const { currentStep, setCurrentStep } = useSetupStep()
+  const { currentStep, setCurrentStep } = useSetupStep();
 
   return (
     <FluffyThemeProvider>
