@@ -1,5 +1,5 @@
 // import "https://cdn.plaid.com/link/v2/stable/link-initialize.js"
-import { AppBar, Autocomplete, Avatar, Box, Button, Card, CardActionArea, CardActions, CardContent, CardHeader, Chip, Container, Divider, Fab, FormControl, GlobalStyles, Grid, IconButton, Input, InputLabel, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Modal, OutlinedInput, Paper, Select, Skeleton, SwipeableDrawer, Tab, Tabs, TextField, Toolbar, Typography, useTheme } from "@mui/material"
+import { AppBar, Autocomplete, Avatar, Box, Button, ButtonBase, Card, CardActionArea, CardActions, CardContent, CardHeader, Chip, Container, Divider, Fab, FormControl, GlobalStyles, Grid, IconButton, Input, InputLabel, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Modal, OutlinedInput, Paper, Select, Skeleton, SwipeableDrawer, Tab, Tabs, TextField, Toolbar, Typography, useTheme } from "@mui/material"
 import { FluffyThemeProvider } from "~common/utils/theme"
 import { sendToBackground } from "@plasmohq/messaging";
 import { LoginGate } from "~common/components/LoginGate";
@@ -31,12 +31,12 @@ const TransactionModal = (props: { transaction: PlaidTransaction | null, onClose
   const [temporaryData, setTemporaryData] = useState(transaction)
   useEffect(() => setTemporaryData(transaction), [transaction])
 
-  const {result: account} = useAsync(async () => balanceDb.get(transaction?.account_id || ""), [transaction])
+  const { result: account } = useAsync(async () => balanceDb.get(transaction?.account_id || ""), [transaction])
 
   const changed = _.isEqual(transaction, temporaryData)
 
   const onSave = async () => {
-    if (temporaryData){
+    if (temporaryData) {
       setSaveEnabled(false);
       await props.onSave(temporaryData);
       setSaveEnabled(true);
@@ -47,34 +47,34 @@ const TransactionModal = (props: { transaction: PlaidTransaction | null, onClose
     <Modal open={!!transaction} onClose={onClose}>
       <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center" onClick={onClose}>
         <Box onClick={e => e.stopPropagation()}>
-          <Card sx={{minWidth: 500}}>
+          <Card sx={{ minWidth: 500 }}>
             <CardHeader title={dollarDisplay(transaction?.amount || 0)} subheader={account?.name} />
             <Divider />
             <CardContent>
               <List>
                 <ListItem secondaryAction={<TextField type="date" size="small" label={"Merchant"} value={temporaryData?.date} />}>
-                  <ListItemIcon><CalendarMonth color="primary"/></ListItemIcon>
+                  <ListItemIcon><CalendarMonth color="primary" /></ListItemIcon>
                   <ListItemText>Date</ListItemText>
                 </ListItem>
                 <ListItem secondaryAction={<TextField size="small" label={"Name"} value={temporaryData?.name} />}>
-                  <ListItemIcon><Abc color="primary"/></ListItemIcon>
+                  <ListItemIcon><Abc color="primary" /></ListItemIcon>
                   <ListItemText>Name</ListItemText>
                 </ListItem>
                 <ListItem secondaryAction={
                   <Autocomplete
                     size="small"
                     value={temporaryData?.merchant_name}
-                    renderInput={props => <TextField {...props} label={"Merchant"} />} 
+                    renderInput={props => <TextField {...props} label={"Merchant"} />}
                     options={[]}
                   />
                 }>
-                  <ListItemIcon><Shop color="primary"/></ListItemIcon>
+                  <ListItemIcon><Shop color="primary" /></ListItemIcon>
                   <ListItemText>Merchant</ListItemText>
                 </ListItem>
               </List>
             </CardContent>
             <Divider />
-            <CardActions sx={{display: "flex", flexDirection: "row-reverse"}}>
+            <CardActions sx={{ display: "flex", flexDirection: "row-reverse" }}>
               <Button variant="contained" onClick={onSave} disabled={!saveEnabled || !changed}>Save</Button>
             </CardActions>
           </Card>
@@ -119,7 +119,7 @@ export default () => {
   )
   const accountIndex = useMemo(
     () => accounts?.reduce(
-      (acc, a) => ({ ...acc, [a.account_id]: a }), 
+      (acc, a) => ({ ...acc, [a.account_id]: a }),
       {} as { [id: string]: typeof accounts[number] }
     ) || [] as NonNullable<typeof accounts>,
     [accounts]
@@ -149,7 +149,7 @@ export default () => {
         sort: [{ date: "desc" }]
       }).then(result => result.docs)
     },
-    [serializedDateRange.startDate, serializedDateRange.endDate, selectedAccounts, categoryFilter]
+    [serializedDateRange.startDate, serializedDateRange.endDate, selectedAccounts, JSON.stringify(categoryFilter)]
   );
   const transactionDates = _(transactions || [])
     .map((doc) => doc.date)
@@ -268,19 +268,30 @@ export default () => {
             <Grid item xs={12} md={4}>
               <Card variant="outlined" sx={{ width: "100%", minHeight: "100%" }}>
                 <CardHeader title="Categories" subheader={
-                  <Box display={"flex"} flexDirection={"row"} alignItems={"center"} flexWrap={"wrap"}>
+                  <Box display={"flex"} flexDirection={"row"} alignItems={"center"} flexWrap={"wrap"} mt={1}>
                     {!!categoryFilter.length
-                      ? categoryFilter.map((c, i) => (
-                        <React.Fragment key={`${c}-${i}`}>
-                          {i !== 0 && <ChevronRight sx={{ mt: 1 }} />}
-                          <Chip label={c} size="small" sx={{ mt: 1 }} deleteIcon={<Cancel />} onDelete={() => setCategoryFilter(categoryFilter.slice(0, i))} />
-                        </React.Fragment>
-                      ))
+                      ? (
+                        <>
+                          <Button size="small" onClick={() => setCategoryFilter([])} >Clear</Button>
+                          {
+                            categoryFilter.map((c, i) => (
+                              <React.Fragment key={`${c}-${i}`}>
+                                {i !== 0 && <ChevronRight />}
+                                <Chip
+                                  label={c} size="small"
+                                  component={ButtonBase}
+                                  onClick={() => setCategoryFilter(categoryFilter.slice(0, i + 1))}
+                                />
+                              </React.Fragment>
+                            ))
+                          }
+                        </>
+                      )
                       : "All"}
                   </Box>
                 } />
                 <CardContent sx={{ height: "400px" }}>
-                  <CategorySunburst rootPath={categoryFilter} transactions={spendings} onClick={({ path }) =>{
+                  <CategorySunburst rootPath={categoryFilter} transactions={spendings} onClick={({ path }) => {
                     const filters = reverse(path.filter(p => p !== "root") as string[])
                     setCategoryFilter(uniq([...categoryFilter, ...filters]))
                   }} />
@@ -370,7 +381,10 @@ export default () => {
                                     {doc.category.map((c, i) => (
                                       <>
                                         {i > 0 && <ChevronRight />}
-                                        <Chip label={c} size="small" />
+                                        <Chip label={c} size="small" component={ButtonBase} onClick={() => {
+                                          const categoryFilter = doc.category.slice(0, i + 1)
+                                          setCategoryFilter(categoryFilter)
+                                        }} />
                                       </>
                                     ))}
                                   </Box>
