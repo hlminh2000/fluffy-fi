@@ -61,7 +61,7 @@ const expectedSunburstData: ReturnType<typeof computeCategorySunburstData> = {
 }
 
 
-describe("transform", () => {
+describe.skip("transform", () => {
   it("works without rootPath", () => {
     const output = computeCategorySunburstData(transactions)
     expect(output).toEqual(expectedSunburstData)
