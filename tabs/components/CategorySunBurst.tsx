@@ -5,6 +5,25 @@ import { PlaidTransaction } from "~common/plaidTypes"
 import { SunburstNode, computeCategorySunburstData } from "./computeCategorySunburstData"
 import { dollarDisplay } from "~common/utils/displays"
 
+type SunburstNodeWithColor = SunburstNode & { color: string, children: SunburstNodeWithColor []}
+
+const sunburstNodeWithColor = (node: SunburstNode): SunburstNodeWithColor => ({
+  ...node,
+  color: "black",
+  children: node.children.map(sunburstNodeWithColor)
+})
+
+const colorByCategory = async (category: string) => {
+  const colors = [
+    "#e8c1a0",
+    "#f47560",
+    "#f1e15b",
+    "#e8a838",
+    "#61cdbb",
+    "#97e3d5",
+  ];
+}
+
 export const CategorySunburst = (props: { 
   transactions: PlaidTransaction[], 
   onClick?: ComponentProps<typeof ResponsiveSunburst>['onClick'] 
@@ -30,15 +49,15 @@ export const CategorySunburst = (props: {
         justifyContent={"center"}
         alignItems={"center"}
         sx={{ pointerEvents: "none" }}>
-        <Typography variant="h4" color="primary">{dollarDisplay(sum)}</Typography>
+        <Typography variant="h5" color="primary">{dollarDisplay(sum)}</Typography>
       </Box>
       <ResponsiveSunburst <SunburstNode>
         onClick={props.onClick}
-        data={categorySunburstData || {id: "root", value: 0, children: []}}
+        data={sunburstNodeWithColor(categorySunburstData || {id: "root", value: 0, children: []})}
         margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
         cornerRadius={8}
         borderColor={{ theme: 'background' }}
-        colors={{ scheme: 'nivo' }}
+        // colors={(node) => node.data.id}
         childColor={{
           from: 'color',
           modifiers: [[theme.palette.mode === "light" ? 'brighter' : "darker", 0.3]]

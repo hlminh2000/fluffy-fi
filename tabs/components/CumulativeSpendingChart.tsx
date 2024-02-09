@@ -1,4 +1,5 @@
 import { ResponsiveLine } from "@nivo/line";
+import { groupBy, uniq } from "lodash";
 import moment, { Moment } from "moment";
 import { PlaidTransaction } from "~common/plaidTypes";
 import { DATE_FORMAT } from "~common/utils/constants";
@@ -18,27 +19,32 @@ export const CumulativeSpendingChart = ({
 }: { transactions: PlaidTransaction[], fromDate: Moment, toDate: Moment }) => {
   const dates = datesInRange(fromDate, toDate);
   const spendings = transactions.filter(t => t.amount > 0)
-  const data = dates.reduce((acc, date, i) => {
-    const transactionsOnDate = spendings.filter(t => moment(t.date).isSame(date, "day"))
-    const lastSum = acc[i - 1]?.sum || 0
-    const sumOfDay = transactionsOnDate.reduce((sum, t) => sum + t.amount, 0);
-    return [
-      ...acc,
-      { id: date.format(DATE_FORMAT), date, sum: lastSum + sumOfDay }
-    ]
-  }, [] as { date: Moment, sum: number }[])
+  const spendingByCategory = groupBy(spendings, transaction => transaction.category[0] || "Other")
+  const series = Object.entries(spendingByCategory).map(([category, spendings]) => {
+    const data = dates.reduce((acc, date, i) => {
+      const transactionsOnDate = spendings.filter(t => moment(t.date).isSame(date, "day"))
+      const lastSum = acc[i - 1]?.sum || 0
+      const sumOfDay = transactionsOnDate.reduce((sum, t) => sum + t.amount, 0);
+      return [
+        ...acc,
+        { id: date.format(DATE_FORMAT), date, sum: lastSum + sumOfDay }
+      ]
+    }, [] as { date: Moment, sum: number }[])
+    return {
+      id: category,
+      data: data.map(({ date, sum }) => ({ x: date.format(DATE_FORMAT), y: sum }))
+    }
+  })
   return (
     <ResponsiveLine
-      data={[
-        { id: "main", data: data.map(({ date, sum }) => ({ x: date.format(DATE_FORMAT), y: sum })) }
-      ]}
+      data={series}
       margin={{ top: 5, right: 130, bottom: 50, left: 50 }}
       xScale={{ type: 'point' }}
       yScale={{
         type: 'linear',
         min: 'auto',
         max: 'auto',
-        stacked: false,
+        stacked: true,
         reverse: false
       }}
       yFormat=" >-.2f"
@@ -65,7 +71,7 @@ export const CumulativeSpendingChart = ({
       pointLabelYOffset={-12}
       enableArea={true}
       areaBaselineValue={0}
-      areaOpacity={0.5}
+      areaOpacity={0.8}
       useMesh={true}
       legends={[
         {
