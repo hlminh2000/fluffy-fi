@@ -10,7 +10,7 @@ import SyncIcon from '@mui/icons-material/Sync';
 import EditIcon from '@mui/icons-material/Edit';
 import { DateRangePicker } from "mui-daterange-picker";
 import moment from "moment";
-import _ from 'lodash';
+import _, { uniq } from 'lodash';
 import groupBy from "lodash/groupBy";
 import reverse from "lodash/reverse";
 import { AccountTypeIcon } from "~common/components/AccountTypeIcon";
@@ -22,8 +22,8 @@ import { PlaidAccount, PlaidTransaction } from "~common/plaidTypes";
 import { Abc, CalendarMonth, Cancel, ChevronRight, Shop } from "@mui/icons-material";
 import MenuIcon from '@mui/icons-material/Menu';
 import { PasswordGate } from "~common/components/PasswordGate";
+import { dollarDisplay } from "~common/utils/displays";
 
-const displayNumber = (num: number) => isNaN(num) ? "" : `$${num.toLocaleString("US", { minimumFractionDigits: 2 })}`
 
 const TransactionModal = (props: { transaction: PlaidTransaction | null, onClose: () => any, onSave: (t: PlaidTransaction) => any }) => {
   const { transaction, onClose } = props;
@@ -48,7 +48,7 @@ const TransactionModal = (props: { transaction: PlaidTransaction | null, onClose
       <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center" onClick={onClose}>
         <Box onClick={e => e.stopPropagation()}>
           <Card sx={{minWidth: 500}}>
-            <CardHeader title={displayNumber(transaction?.amount || 0)} subheader={account?.name} />
+            <CardHeader title={dollarDisplay(transaction?.amount || 0)} subheader={account?.name} />
             <Divider />
             <CardContent>
               <List>
@@ -158,7 +158,7 @@ export default () => {
     .value()
 
   const spendings = (transactions
-    ?.filter(t => !["Transfer"].some(category => t.category.includes(category)))
+    ?.filter(t => !["Transfer"].some(category => t.category.includes(category)))?.filter(t => t.amount > 0)
     || [] as NonNullable<typeof transactions>
   )
 
@@ -280,9 +280,10 @@ export default () => {
                   </Box>
                 } />
                 <CardContent sx={{ height: "400px" }}>
-                  <CategorySunburst transactions={spendings} onClick={({ path }) =>
-                    setCategoryFilter(reverse(path.filter(p => p !== "root") as string[]))
-                  } />
+                  <CategorySunburst rootPath={categoryFilter} transactions={spendings} onClick={({ path }) =>{
+                    const filters = reverse(path.filter(p => p !== "root") as string[])
+                    setCategoryFilter(uniq([...categoryFilter, ...filters]))
+                  }} />
                 </CardContent>
               </Card>
             </Grid>
@@ -357,7 +358,7 @@ export default () => {
                               {i !== 0 && <Divider variant="inset" />}
                               <ListItem secondaryAction={
                                 <ListItemText sx={{ color: doc.amount < 0 ? theme.palette.success.main : "inherit" }}>
-                                  {displayNumber(-doc.amount)}
+                                  {dollarDisplay(-doc.amount)}
                                   <IconButton size="small" onClick={() => setEditingTransaction(doc)}><EditIcon /></IconButton>
                                 </ListItemText>
                               }>
