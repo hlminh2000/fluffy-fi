@@ -87,17 +87,18 @@ export const TransactionsCard = (props: {
   const theme = useTheme()
 
   return (
-    <Card sx={{ overflow: "hidden", my: 2 }} variant="outlined">
+    <Card variant="outlined">
       <CardHeader title="Transactions" />
+      <Divider />
       <CardContent>
         <TransactionModal transaction={editingTransaction} onClose={() => setEditingTransaction(null)} onSave={console.log} />
-        <List>
+        <List sx={{ minHeight: 400, maxHeight: 700, overflowY: "scroll", position: "relative", py: 0 }}>
           {loading
             ? <Skeleton variant="rectangular" width={"100%"} height={300} />
             : transactionDates?.map((date, i) => (
               <React.Fragment key={i}>
                 <Divider />
-                <ListItem>
+                <ListItem sx={{ position: "sticky", top: 0, bgcolor: theme.palette.background.paper, zIndex: 1 }}>
                   <ListItemText>
                     {date.format(DATE_FORMAT)}
                   </ListItemText>

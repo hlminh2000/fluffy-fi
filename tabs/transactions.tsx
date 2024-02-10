@@ -119,24 +119,23 @@ export default () => {
             </Box>
           </SwipeableDrawer>
         </AppBar>
-        <Box pt={4}>
-          <Container>
+        <Grid container spacing={2} p={2}>
+          <Grid item xs={12}>
             <AccountSelector accounts={accounts} selectedAccounts={selectedAccounts} setSelectedAccounts={setSelectedAccounts} />
-          </Container>
-        </Box>
-        <Container>
-          <Grid container spacing={2} pt={2}>
-            <Grid item xs={12} md={4}>
-              <CategorySunburstCard categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} spendings={spendings} />
-            </Grid>
-            <Grid item xs={12} md={8}>
-              <TrendCard dateRange={dateRange} setDateRange={setDateRange} spendings={spendings} />
-            </Grid>
           </Grid>
-        </Container>
-        <Container>
-          <TransactionsCard loading={loading} transactions={transactions} setCategoryFilter={setCategoryFilter} />
-        </Container>
+          <Grid item xs={12} md={6} lg={4} >
+            <CategorySunburstCard categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} spendings={spendings} />
+          </Grid>
+          <Grid item xs={12} md={6} lg={4} >
+            <TrendCard dateRange={dateRange} setDateRange={setDateRange} spendings={spendings} />
+          </Grid>
+          <Grid item xs={12} md={6} lg={4} >
+            <TrendCard dateRange={dateRange} setDateRange={setDateRange} spendings={spendings} />
+          </Grid>
+          <Grid item xs={12} md={12} lg={6} >
+            <TransactionsCard loading={loading} transactions={transactions} setCategoryFilter={setCategoryFilter} />
+          </Grid>
+        </Grid>
         <Box position={"fixed"} bottom={30} right={30}>
           <Fab color="primary" onClick={onSyncClick} disabled={syncing}>
             <SyncIcon />
