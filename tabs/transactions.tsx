@@ -4,7 +4,7 @@ import { FluffyThemeProvider } from "~common/utils/theme"
 import { sendToBackground } from "@plasmohq/messaging";
 import { LoginGate } from "~common/components/LoginGate";
 import { useAsync } from "react-async-hook";
-import { transactionDb, balanceDb } from "~common/PouchDbs";
+import { transactionDb, balanceDb, categoryDb } from "~common/PouchDbs";
 import React, { ComponentProps, useEffect, useMemo, useState } from "react";
 import SyncIcon from '@mui/icons-material/Sync';
 import EditIcon from '@mui/icons-material/Edit';
@@ -18,11 +18,14 @@ import { DATE_FORMAT } from "~common/utils/constants";
 import { CumulativeSpendingChart } from "~tabs/components/CumulativeSpendingChart";
 import { CategorySunburst } from "~tabs/components/CategorySunBurst";
 import { CashflowChart } from "~tabs/components/CashflowChart";
-import { PlaidAccount, PlaidTransaction } from "~common/plaidTypes";
-import { Abc, CalendarMonth, Cancel, ChevronRight, Shop } from "@mui/icons-material";
+import { PlaidAccount, PlaidTransaction, PlaidTransactionCategory } from "~common/plaidTypes";
+import { Abc, CalendarMonth, Cancel, Category, ChevronRight, Construction, Shop } from "@mui/icons-material";
 import MenuIcon from '@mui/icons-material/Menu';
 import { PasswordGate } from "~common/components/PasswordGate";
 import { dollarDisplay } from "~common/utils/displays";
+import { getTransactionCategoryTree, useTransactionCategoryTree } from "~common/utils/getTransactionCategoryTree";
+import { AccountSelector } from "./components/AccountSelector";
+import { CategorySunburstCard } from "./components/CategorySunburstCard";
 
 
 const TransactionModal = (props: { transaction: PlaidTransaction | null, onClose: () => any, onSave: (t: PlaidTransaction) => any }) => {
@@ -162,12 +165,6 @@ export default () => {
     || [] as NonNullable<typeof transactions>
   )
 
-  const accountColor = (account: PlaidAccount) => ({
-    depository: "success" as "success",
-    credit: "warning" as "warning",
-    loan: "warning" as "warning",
-    investment: "success" as "success",
-  }[account?.type] || "info" as "info")
 
   const transactionByDates = groupBy(transactions, t => moment(t.date).format(DATE_FORMAT))
 
@@ -176,6 +173,8 @@ export default () => {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const [editingTransaction, setEditingTransaction] = useState<PlaidTransaction | null>(null)
+
+  const { categoryTree } = useTransactionCategoryTree();
 
   return (
     <FluffyThemeProvider>
@@ -215,88 +214,15 @@ export default () => {
             </Box>
           </SwipeableDrawer>
         </AppBar>
-
         <Box pt={4}>
           <Container>
-            <FormControl fullWidth>
-              <InputLabel id="accounts">Accounts</InputLabel>
-              <Select <string[]>
-                fullWidth
-                labelId="accounts"
-                multiple
-                value={selectedAccounts || []}
-                onChange={e => setSelectedAccounts(e.target.value as string[])}
-                input={<OutlinedInput label="Accounts" />}
-                renderValue={(selected) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {selected.map((accountId) => (
-                      <Chip
-                        icon={<AccountTypeIcon type={accountIndex[accountId]?.type} />}
-                        color={accountColor(accountIndex[accountId])}
-                        key={accountId}
-                        label={accountIndex[accountId]?.name}
-                      />
-                    ))}
-                  </Box>
-                )}
-              >
-                {accounts?.map((account) => (
-                  <MenuItem
-                    key={account.account_id}
-                    value={account.account_id}
-                  >
-                    <ListItem secondaryAction={
-                      <ListItemText>
-                        ${(account.balances.current).toFixed(2)}
-                      </ListItemText>
-                    }>
-                      <ListItemIcon>
-                        <AccountTypeIcon type={account.type} color={accountColor(account)} />
-                      </ListItemIcon>
-                      <ListItemText>
-                        {account.name}
-                      </ListItemText>
-                    </ListItem>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <AccountSelector accounts={accounts} selectedAccounts={selectedAccounts} setSelectedAccounts={setSelectedAccounts} />
           </Container>
         </Box>
         <Container>
           <Grid container spacing={2} pt={2}>
             <Grid item xs={12} md={4}>
-              <Card variant="outlined" sx={{ width: "100%", minHeight: "100%" }}>
-                <CardHeader title="Categories" subheader={
-                  <Box display={"flex"} flexDirection={"row"} alignItems={"center"} flexWrap={"wrap"} mt={1}>
-                    {!!categoryFilter.length
-                      ? (
-                        <>
-                          <Button size="small" onClick={() => setCategoryFilter([])} >Clear</Button>
-                          {
-                            categoryFilter.map((c, i) => (
-                              <React.Fragment key={`${c}-${i}`}>
-                                {i !== 0 && <ChevronRight />}
-                                <Chip
-                                  label={c} size="small"
-                                  component={ButtonBase}
-                                  onClick={() => setCategoryFilter(categoryFilter.slice(0, i + 1))}
-                                />
-                              </React.Fragment>
-                            ))
-                          }
-                        </>
-                      )
-                      : "All"}
-                  </Box>
-                } />
-                <CardContent sx={{ height: "400px" }}>
-                  <CategorySunburst rootPath={categoryFilter} transactions={spendings} onClick={({ path }) => {
-                    const filters = reverse(path.filter(p => p !== "root") as string[])
-                    setCategoryFilter(uniq([...categoryFilter, ...filters]))
-                  }} />
-                </CardContent>
-              </Card>
+              <CategorySunburstCard categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} spendings={spendings} />
             </Grid>
             <Grid item xs={12} md={8}>
               <Card variant="outlined" sx={{ width: "100%", minHeight: "100%" }}>

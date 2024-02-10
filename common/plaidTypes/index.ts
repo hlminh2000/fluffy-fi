@@ -136,3 +136,5 @@ export type PlaidConnectionStorage = {
     },
   },
 }
+
+export type PlaidTransactionCategory = { category_id: string, hierarchy: string[] }

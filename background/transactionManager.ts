@@ -1,10 +1,11 @@
 import { STORAGE_KEY } from "~common/utils/constants";
 import { passwordCache } from "./passwordCache";
 import { storageVault } from "./storageVault";
-import type { PlaidConnectionStorage, PlaidItemAccount, PlaidItemStorage, PlaidTransaction, PlaidTransactionSync } from "~common/plaidTypes";
+import type { PlaidConnectionStorage, PlaidItemAccount, PlaidItemStorage, PlaidTransaction, PlaidTransactionCategory, PlaidTransactionSync } from "~common/plaidTypes";
 import Queue from 'promise-queue';
 import PouchDb from 'pouchdb'
-import { balanceDb, cursorDb, transactionDb } from "~common/PouchDbs";
+import { balanceDb, categoryDb, cursorDb, transactionDb } from "~common/PouchDbs";
+import { categories } from '~assets/categories.json';
 
 
 export const transactionManager = (() => {
@@ -83,7 +84,6 @@ export const transactionManager = (() => {
         }).then(res => res.json())) as PlaidItemAccount
         await Promise.all(balances.accounts.map(async (account) => {
           const existing = await balanceDb.get(account.account_id).catch(() => ({ _id: account.account_id, _rev: undefined }))
-          console.log("existing: ", existing)
           await balanceDb.put({
             _id: existing._id,
             _rev: existing._rev,
@@ -91,10 +91,28 @@ export const transactionManager = (() => {
           })
         }))
       }
+      const syncCategories = async () => {
+        console.log("syncCategories")
+        const { categories }: { categories: PlaidTransactionCategory[] } = (await fetch("https://sandbox.plaid.com/categories/get", {
+          method: "POST",
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}'
+        }).then(res => res.json())) 
+
+        await Promise.all(categories.map(async category => {
+          const existing = await categoryDb.get(category.category_id).catch(() => ({ _id: category.category_id, _rev: undefined }))
+          await categoryDb.put({
+            _id: existing._id,
+            _rev: existing._rev,
+            ...category
+          })
+        }))
+      }
 
       await Promise.all([
         syncTransactions(),
-        syncBalance()
+        syncBalance(),
+        syncCategories()
       ])
     }))
     return { newTransactionCount, modifiedTransactionCount, removedTransactionCount }
