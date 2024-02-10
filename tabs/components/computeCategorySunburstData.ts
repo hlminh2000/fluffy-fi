@@ -8,6 +8,7 @@ export type SunburstNode = {
   id: string,
   value: number,
   children: SunburstNode[],
+  fullPath: string[],
   transactions?: TransactionSubData[]
 }
 
@@ -19,7 +20,7 @@ const constructTree = (parent: SunburstNode, categoryChain: string[], transactio
   const [currentCategory, ...subCategoryChain] = categoryChain
   let currentNode = parent.children.find(node => node.id === currentCategory)
   if (!currentNode) {
-    currentNode = { id: currentCategory, value: 0, children: [], transactions: [] }
+    currentNode = { id: currentCategory, value: 0, children: [], transactions: [], fullPath: [...parent.fullPath, currentCategory] }
     parent.children?.push(currentNode)
   }
   constructTree(currentNode, subCategoryChain, transaction)
@@ -41,6 +42,7 @@ export const computeCategorySunburstData = (
     id: "root",
     value: 0,
     children: [],
+    fullPath: [],
     transactions: []
   }
   transactions.forEach(transaction => {

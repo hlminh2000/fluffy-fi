@@ -1,9 +1,9 @@
-import { AppBar, Box, Card, CardContent, CardHeader, Container, Fab, Grid, IconButton, List, ListItemButton, ListItemText, SwipeableDrawer, Toolbar, useTheme } from "@mui/material"
+import { AppBar, Box, Card, CardContent, CardHeader, Collapse, Container, Divider, Fab, Grid, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, SwipeableDrawer, TextField, Toolbar, useTheme } from "@mui/material"
 import { FluffyThemeProvider } from "~common/utils/theme"
 import { sendToBackground } from "@plasmohq/messaging";
 import { useAsync } from "react-async-hook";
 import { transactionDb, balanceDb } from "~common/PouchDbs";
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import SyncIcon from '@mui/icons-material/Sync';
 import moment, { Moment } from "moment";
 import _, { groupBy, sumBy } from 'lodash';
@@ -18,6 +18,8 @@ import { TransactionsCard } from "./components/TransactionsCard";
 import { CashflowCard } from "./components/CashflowCard";
 import { ResponsiveCalendar } from '@nivo/calendar'
 import { PlaidTransaction } from "~common/plaidTypes";
+import { Category, Dashboard, Expand, ExpandLess, ExpandMore } from "@mui/icons-material";
+import ColorHash from "color-hash";
 
 type DateRange = {
   startDate: Moment,
@@ -26,7 +28,7 @@ type DateRange = {
 }
 
 const CalendarCard = (props: { spendings: PlaidTransaction[], dateRange: DateRange }) => {
-  const { dateRange, spendings} = props;
+  const { dateRange, spendings } = props;
   const theme = useTheme();
   return (
     <Card sx={{ minHeight: "100%" }} variant="outlined">
@@ -65,6 +67,47 @@ const CalendarCard = (props: { spendings: PlaidTransaction[], dateRange: DateRan
         />
       </CardContent>
     </Card>
+  )
+}
+
+const CategoryTree = (props: { node: ReturnType<typeof useTransactionCategoryTree>["categoryTree"] }) => {
+  const { node } = props;
+  const [openChildren, setOpenChildren] = useState<Record<string, boolean>>({});
+
+  const toggleChildOpen = (childName: string) => () => setOpenChildren({
+    ...openChildren,
+    [childName]: !openChildren[childName]
+  })
+  
+
+  return (
+    <List sx={{ width: "100%" }}>
+      {node?.children.map(child => (
+        <Fragment key={child.name}>
+          <ListItemButton
+            onClick={toggleChildOpen(child.name)}
+          >
+            {/* <ListItemIcon>
+              <TextField value={new ColorHash().hex(child.name)} onClick={e => e.stopPropagation()} type="color" size="small" fullWidth sx={{ width: "47px" }} />
+            </ListItemIcon> */}
+            <ListItemText>{child.name}</ListItemText>
+            {
+              !!child.children.length && (
+                !openChildren[child.name] ? <ExpandMore /> : <ExpandLess />
+              )
+            }
+          </ListItemButton>
+          <Divider variant="inset"/>
+          {!!child.children.length && (
+            <Collapse in={!!openChildren[child.name]}>
+              <ListItem sx={{ ml: 2 }}>
+                <CategoryTree node={child} />
+              </ListItem>
+            </Collapse>
+          )}
+        </Fragment>
+      ))}
+    </List>
   )
 }
 
@@ -125,7 +168,7 @@ export default () => {
     },
     [serializedDateRange.startDate, serializedDateRange.endDate, selectedAccounts, JSON.stringify(categoryFilter)]
   );
-  
+
 
   const spendings = (transactions
     ?.filter(t => !["Transfer"].some(category => t.category.includes(category)))?.filter(t => t.amount > 0)
@@ -134,7 +177,9 @@ export default () => {
 
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  const theme = useTheme();
+  const [currentView, setCurrentView] = useState<"dashboard" | "category">("category")
+
+  const { categoryTree } = useTransactionCategoryTree();
 
   return (
     <FluffyThemeProvider>
@@ -164,46 +209,67 @@ export default () => {
               onKeyDown={() => setDrawerOpen(false)}
             >
               <List>
-                <ListItemButton>
-                  <ListItemText primary={"Hello"} />
+                <ListItemButton onClick={() => setCurrentView("dashboard")}>
+                  <ListItemIcon><Dashboard /></ListItemIcon>
+                  <ListItemText primary={"Dashboard"} />
                 </ListItemButton>
-                <ListItemButton>
-                  <ListItemText primary={"World"} />
+                <ListItemButton onClick={() => setCurrentView("category")}>
+                  <ListItemIcon><Category /></ListItemIcon>
+                  <ListItemText primary={"Transaction Categories"} />
                 </ListItemButton>
               </List>
             </Box>
           </SwipeableDrawer>
         </AppBar>
-        <Grid container spacing={2} p={2}>
-          <Grid item xs={12}>
-            <AccountSelector accounts={accounts} selectedAccounts={selectedAccounts} setSelectedAccounts={setSelectedAccounts} />
-          </Grid>
-          <Grid item xs={12} md={6} lg={4} >
-            <CategorySunburstCard categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} spendings={spendings} />
-          </Grid>
-          <Grid item xs={12} md={6} lg={4} >
-            <CumulativeSpendCard dateRange={dateRange} setDateRange={setDateRange} spendings={spendings} />
-          </Grid>
-          <Grid item xs={12} md={6} lg={4} >
-            <CashflowCard dateRange={dateRange} setDateRange={setDateRange} spendings={spendings} />
-          </Grid>
-          <Grid item container spacing={2} xs={12} md={6} >
-            <Grid item xs={12}>
-              <CalendarCard dateRange={dateRange} spendings={spendings} />
-            </Grid>
-            <Grid item xs={12}>
-              <CalendarCard dateRange={dateRange} spendings={spendings} />
-            </Grid>
-          </Grid>
-          <Grid item xs={12} md={12} lg={6} >
-            <TransactionsCard loading={loading} transactions={transactions} setCategoryFilter={setCategoryFilter} />
-          </Grid>
-        </Grid>
-        <Box position={"fixed"} bottom={30} right={30} zIndex={2}>
-          <Fab color="primary" onClick={onSyncClick} disabled={syncing}>
-            <SyncIcon />
-          </Fab>
-        </Box>
+        {
+          currentView === "dashboard" && (
+            <>
+              <Grid container spacing={2} p={2}>
+                <Grid item xs={12}>
+                  <AccountSelector accounts={accounts} selectedAccounts={selectedAccounts} setSelectedAccounts={setSelectedAccounts} />
+                </Grid>
+                <Grid item xs={12} md={6} lg={4} >
+                  <CategorySunburstCard categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} spendings={spendings} />
+                </Grid>
+                <Grid item xs={12} md={6} lg={4} >
+                  <CumulativeSpendCard dateRange={dateRange} setDateRange={setDateRange} spendings={spendings} />
+                </Grid>
+                <Grid item xs={12} md={6} lg={4} >
+                  <CashflowCard dateRange={dateRange} setDateRange={setDateRange} spendings={spendings} />
+                </Grid>
+                <Grid item container spacing={2} xs={12} md={6} >
+                  <Grid item xs={12}>
+                    <CalendarCard dateRange={dateRange} spendings={spendings} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <CalendarCard dateRange={dateRange} spendings={spendings} />
+                  </Grid>
+                </Grid>
+                <Grid item xs={12} md={12} lg={6} >
+                  <TransactionsCard loading={loading} transactions={transactions} setCategoryFilter={setCategoryFilter} />
+                </Grid>
+              </Grid>
+              <Box position={"fixed"} bottom={30} right={30} zIndex={2}>
+                <Fab color="primary" onClick={onSyncClick} disabled={syncing}>
+                  <SyncIcon />
+                </Fab>
+              </Box>
+            </>
+          )
+        }
+        {
+          currentView === "category" && (
+            <Container sx={{mt: 4}}>
+              <Card variant="outlined">
+                <CardHeader title="Transaction Categories"/>
+                <Divider/>
+                <CardContent>
+                  <CategoryTree node={categoryTree} />
+                </CardContent>
+              </Card>
+            </Container>
+          )
+        }
       </PasswordGate>
     </FluffyThemeProvider>
   )

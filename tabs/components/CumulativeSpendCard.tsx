@@ -9,6 +9,8 @@ import { CashflowChart } from "~tabs/components/CashflowChart";
 import { PlaidTransaction } from "~common/plaidTypes";
 import { ResponsiveLine } from "@nivo/line";
 import { groupBy, uniq } from "lodash";
+import ColorHash from "color-hash";
+import { colorHash } from "~common/utils/theme";
 
 const datesInRange = (fromDate: Moment, toDate: Moment) => {
   let output = [] as Moment[];
@@ -79,6 +81,7 @@ export const CumulativeSpendingChart = ({
       areaBaselineValue={0}
       areaOpacity={0.8}
       useMesh={true}
+      colors={series => colorHash.hex(series.id)}
       legends={[
         {
           anchor: 'bottom-right',

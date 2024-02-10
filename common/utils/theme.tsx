@@ -1,6 +1,8 @@
 import { CssBaseline, createTheme } from "@mui/material";
 import { ThemeProvider } from '@mui/material/styles';
 import { useColorThemeSetting } from "./settingsHooks";
+import ColorHash from "color-hash";
+import { sum } from "lodash";
 
 
 export const FluffyThemeProvider = ({ children }) => {
@@ -39,3 +41,9 @@ export const FluffyThemeProvider = ({ children }) => {
     </ThemeProvider>
   )
 }
+
+export const colorHash = new ColorHash({
+  saturation: 1, 
+  lightness: 0.7, 
+  hash: v => sum(new TextEncoder().encode(`${v}!`))
+});

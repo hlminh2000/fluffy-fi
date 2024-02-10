@@ -6,6 +6,8 @@ import { SunburstNode, computeCategorySunburstData } from "./computeCategorySunb
 import { dollarDisplay } from "~common/utils/displays"
 import { ChevronRight } from "@mui/icons-material"
 import { reverse, uniq } from "lodash"
+import ColorHash from "color-hash"
+import { colorHash } from "~common/utils/theme"
 
 type SunburstNodeWithColor = SunburstNode & { color: string, children: SunburstNodeWithColor []}
 
@@ -55,11 +57,11 @@ const CategorySunburst = (props: {
       </Box>
       <ResponsiveSunburst <SunburstNode>
         onClick={props.onClick}
-        data={sunburstNodeWithColor(categorySunburstData || {id: "root", value: 0, children: []})}
+        data={sunburstNodeWithColor(categorySunburstData || {id: "root", value: 0, children: [], fullPath: []})}
         margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
         cornerRadius={8}
         borderColor={{ theme: 'background' }}
-        // colors={(node) => node.data.id}
+        colors={(node) => colorHash.hex(node.data.fullPath[0])}
         childColor={{
           from: 'color',
           modifiers: [[theme.palette.mode === "light" ? 'brighter' : "darker", 0.3]]
