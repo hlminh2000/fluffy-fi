@@ -1,29 +1,25 @@
 // import "https://cdn.plaid.com/link/v2/stable/link-initialize.js"
-import { AppBar, Autocomplete, Avatar, Box, Button, ButtonBase, Card, CardActionArea, CardActions, CardContent, CardHeader, Chip, Container, Divider, Fab, FormControl, GlobalStyles, Grid, IconButton, Input, InputLabel, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Modal, OutlinedInput, Paper, Select, Skeleton, SwipeableDrawer, Tab, Tabs, TextField, Toolbar, Typography, useTheme } from "@mui/material"
+import { AppBar, Autocomplete, Avatar, Box, Button, ButtonBase, Card, CardActions, CardContent, CardHeader, Chip, Container, Divider, Fab, GlobalStyles, Grid, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Modal,  Paper, Skeleton, SwipeableDrawer, Tab, Tabs, TextField, Toolbar, useTheme } from "@mui/material"
 import { FluffyThemeProvider } from "~common/utils/theme"
 import { sendToBackground } from "@plasmohq/messaging";
-import { LoginGate } from "~common/components/LoginGate";
 import { useAsync } from "react-async-hook";
-import { transactionDb, balanceDb, categoryDb } from "~common/PouchDbs";
-import React, { ComponentProps, useEffect, useMemo, useState } from "react";
+import { transactionDb, balanceDb } from "~common/PouchDbs";
+import React, { useEffect, useMemo, useState } from "react";
 import SyncIcon from '@mui/icons-material/Sync';
 import EditIcon from '@mui/icons-material/Edit';
 import { DateRangePicker } from "mui-daterange-picker";
 import moment from "moment";
-import _, { uniq } from 'lodash';
+import _ from 'lodash';
 import groupBy from "lodash/groupBy";
-import reverse from "lodash/reverse";
-import { AccountTypeIcon } from "~common/components/AccountTypeIcon";
 import { DATE_FORMAT } from "~common/utils/constants";
 import { CumulativeSpendingChart } from "~tabs/components/CumulativeSpendingChart";
-import { CategorySunburst } from "~tabs/components/CategorySunBurst";
 import { CashflowChart } from "~tabs/components/CashflowChart";
-import { PlaidAccount, PlaidTransaction, PlaidTransactionCategory } from "~common/plaidTypes";
-import { Abc, CalendarMonth, Cancel, Category, ChevronRight, Construction, Shop } from "@mui/icons-material";
+import { PlaidTransaction } from "~common/plaidTypes";
+import { Abc, CalendarMonth, ChevronRight, Shop } from "@mui/icons-material";
 import MenuIcon from '@mui/icons-material/Menu';
 import { PasswordGate } from "~common/components/PasswordGate";
 import { dollarDisplay } from "~common/utils/displays";
-import { getTransactionCategoryTree, useTransactionCategoryTree } from "~common/utils/getTransactionCategoryTree";
+import { useTransactionCategoryTree } from "~common/utils/getTransactionCategoryTree";
 import { AccountSelector } from "./components/AccountSelector";
 import { CategorySunburstCard } from "./components/CategorySunburstCard";
 
