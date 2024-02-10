@@ -7,13 +7,10 @@ import { transactionDb, balanceDb } from "~common/PouchDbs";
 import React, { useEffect, useMemo, useState } from "react";
 import SyncIcon from '@mui/icons-material/Sync';
 import EditIcon from '@mui/icons-material/Edit';
-import { DateRangePicker } from "mui-daterange-picker";
 import moment from "moment";
 import _ from 'lodash';
 import groupBy from "lodash/groupBy";
 import { DATE_FORMAT } from "~common/utils/constants";
-import { CumulativeSpendingChart } from "~tabs/components/CumulativeSpendingChart";
-import { CashflowChart } from "~tabs/components/CashflowChart";
 import { PlaidTransaction } from "~common/plaidTypes";
 import { Abc, CalendarMonth, ChevronRight, Shop } from "@mui/icons-material";
 import MenuIcon from '@mui/icons-material/Menu';
@@ -22,6 +19,7 @@ import { dollarDisplay } from "~common/utils/displays";
 import { useTransactionCategoryTree } from "~common/utils/getTransactionCategoryTree";
 import { AccountSelector } from "./components/AccountSelector";
 import { CategorySunburstCard } from "./components/CategorySunburstCard";
+import { TrendCard } from "./components/TrendCard";
 
 
 const TransactionModal = (props: { transaction: PlaidTransaction | null, onClose: () => any, onSave: (t: PlaidTransaction) => any }) => {
@@ -98,8 +96,6 @@ export default () => {
     endDate: dateRange.endDate.format(DATE_FORMAT)
   }
   const [syncing, setSyncing] = useState(false);
-  const [open, setOpen] = useState(false);
-  const toggle = () => setOpen(!open);
 
   const onSyncClick = async () => {
     setSyncing(true)
@@ -115,13 +111,6 @@ export default () => {
       return result.rows.map(({ doc }) => doc as NonNullable<typeof doc>)
     },
     []
-  )
-  const accountIndex = useMemo(
-    () => accounts?.reduce(
-      (acc, a) => ({ ...acc, [a.account_id]: a }),
-      {} as { [id: string]: typeof accounts[number] }
-    ) || [] as NonNullable<typeof accounts>,
-    [accounts]
   )
 
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>()
@@ -163,8 +152,6 @@ export default () => {
 
 
   const transactionByDates = groupBy(transactions, t => moment(t.date).format(DATE_FORMAT))
-
-  const [selectedTrendTab, setSelectedTrendTab] = useState<0 | 1>(0)
 
   const [drawerOpen, setDrawerOpen] = useState(false)
 
@@ -221,49 +208,7 @@ export default () => {
               <CategorySunburstCard categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} spendings={spendings} />
             </Grid>
             <Grid item xs={12} md={8}>
-              <Card variant="outlined" sx={{ width: "100%", minHeight: "100%" }}>
-                <CardHeader title="Trends"
-                  subheader={
-                    <Box>
-                      <Box display={"flex"} alignItems={"center"}>
-                        {dateRange.label || `${dateRange.startDate.format(DATE_FORMAT)} ~ ${dateRange.endDate.format(DATE_FORMAT)}`}
-                        <IconButton onClick={toggle} size="small">
-                          <EditIcon />
-                        </IconButton>
-                      </Box>
-                    </Box>
-                  }
-                />
-                <Modal open={open} >
-                  <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center">
-                    <Paper sx={{ width: "690px", overflow: "hidden" }}>
-                      <GlobalStyles styles={{
-                        ".date-picker .MuiPaper-root": { boxShadow: "none" }
-                      }} />
-                      <DateRangePicker
-                        open
-                        onChange={e => setDateRange({
-                          startDate: moment(e.startDate),
-                          endDate: moment(e.endDate),
-                          // @ts-ignore
-                          label: e.label
-                        })}
-                        toggle={toggle}
-                        wrapperClassName="date-picker" />
-                    </Paper>
-                  </Box>
-                </Modal>
-                <CardContent sx={{ height: "400px" }}>
-                  <Box height={"330px"}>
-                    {selectedTrendTab === 0 && <CumulativeSpendingChart transactions={spendings || []} fromDate={dateRange.startDate} toDate={dateRange.endDate} />}
-                    {selectedTrendTab === 1 && <CashflowChart transactions={spendings || []} fromDate={dateRange.startDate} toDate={dateRange.endDate} />}
-                  </Box>
-                  <Tabs value={selectedTrendTab} onChange={(e, newValue) => setSelectedTrendTab(newValue)} variant="fullWidth">
-                    <Tab label={"Cumulative Spend"} />
-                    <Tab label={"Cashflow"} />
-                  </Tabs>
-                </CardContent>
-              </Card>
+              <TrendCard dateRange={dateRange} setDateRange={setDateRange} spendings={spendings} />
             </Grid>
           </Grid>
         </Container>
