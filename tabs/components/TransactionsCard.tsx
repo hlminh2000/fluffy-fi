@@ -87,11 +87,11 @@ export const TransactionsCard = (props: {
   const theme = useTheme()
 
   return (
-    <Card variant="outlined">
+    <Card variant="outlined" sx={{height: "100%", display: "flex", flexDirection: "column"}}>
       <CardHeader title="Transactions" />
+      <TransactionModal transaction={editingTransaction} onClose={() => setEditingTransaction(null)} onSave={console.log} />
       <Divider />
-      <CardContent>
-        <TransactionModal transaction={editingTransaction} onClose={() => setEditingTransaction(null)} onSave={console.log} />
+      <CardContent sx={{flex: 1}}>
         <List sx={{ minHeight: 400, maxHeight: 700, overflowY: "scroll", position: "relative", py: 0 }}>
           {loading
             ? <Skeleton variant="rectangular" width={"100%"} height={300} />

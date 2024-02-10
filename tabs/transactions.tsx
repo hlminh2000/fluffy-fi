@@ -1,24 +1,77 @@
-import { AppBar, Box, Container, Fab, Grid, IconButton, List, ListItemButton, ListItemText, SwipeableDrawer, Toolbar } from "@mui/material"
+import { AppBar, Box, Card, CardContent, CardHeader, Container, Fab, Grid, IconButton, List, ListItemButton, ListItemText, SwipeableDrawer, Toolbar, useTheme } from "@mui/material"
 import { FluffyThemeProvider } from "~common/utils/theme"
 import { sendToBackground } from "@plasmohq/messaging";
 import { useAsync } from "react-async-hook";
 import { transactionDb, balanceDb } from "~common/PouchDbs";
 import React, { useEffect, useState } from "react";
 import SyncIcon from '@mui/icons-material/Sync';
-import moment from "moment";
-import _ from 'lodash';
+import moment, { Moment } from "moment";
+import _, { groupBy, sumBy } from 'lodash';
 import { DATE_FORMAT } from "~common/utils/constants";
 import MenuIcon from '@mui/icons-material/Menu';
 import { PasswordGate } from "~common/components/PasswordGate";
 import { useTransactionCategoryTree } from "~common/utils/getTransactionCategoryTree";
 import { AccountSelector } from "./components/AccountSelector";
 import { CategorySunburstCard } from "./components/CategorySunburstCard";
-import { TrendCard } from "./components/TrendCard";
+import { CumulativeSpendCard } from "./components/CumulativeSpendCard";
 import { TransactionsCard } from "./components/TransactionsCard";
+import { CashflowCard } from "./components/CashflowCard";
+import { ResponsiveCalendar } from '@nivo/calendar'
+import { PlaidTransaction } from "~common/plaidTypes";
+
+type DateRange = {
+  startDate: Moment,
+  endDate: Moment,
+  label: string
+}
+
+const CalendarCard = (props: { spendings: PlaidTransaction[], dateRange: DateRange }) => {
+  const { dateRange, spendings} = props;
+  const theme = useTheme();
+  return (
+    <Card sx={{ minHeight: "100%" }} variant="outlined">
+      <CardHeader title={"Calendar"}></CardHeader>
+      <CardContent sx={{ height: "300px" }}>
+        <ResponsiveCalendar
+          data={
+            _(spendings)
+              .groupBy("date")
+              .entries()
+              .map(([day, spendings]) => ({ day, value: sumBy(spendings, "amount") }))
+              .value()
+          }
+          from={dateRange.startDate.format(DATE_FORMAT)}
+          to={dateRange.endDate.format(DATE_FORMAT)}
+          emptyColor={theme.palette.grey[500]}
+          margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
+          yearSpacing={40}
+          monthBorderColor={theme.palette.grey[500]}
+          dayBorderWidth={2}
+          // daySpacing={8}
+          monthSpacing={8}
+          // dayBorderColor="#ffffff"
+          legends={[
+            {
+              anchor: 'bottom-right',
+              direction: 'row',
+              translateY: 36,
+              itemCount: 4,
+              itemWidth: 42,
+              itemHeight: 36,
+              itemsSpacing: 14,
+              itemDirection: 'right-to-left'
+            }
+          ]}
+        />
+      </CardContent>
+    </Card>
+  )
+}
+
 
 export default () => {
 
-  const [dateRange, setDateRange] = useState({
+  const [dateRange, setDateRange] = useState<DateRange>({
     startDate: moment().startOf("week"),
     endDate: moment().endOf("day"),
     label: "This Week"
@@ -81,6 +134,8 @@ export default () => {
 
   const [drawerOpen, setDrawerOpen] = useState(false)
 
+  const theme = useTheme();
+
   return (
     <FluffyThemeProvider>
       <PasswordGate>
@@ -127,16 +182,24 @@ export default () => {
             <CategorySunburstCard categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} spendings={spendings} />
           </Grid>
           <Grid item xs={12} md={6} lg={4} >
-            <TrendCard dateRange={dateRange} setDateRange={setDateRange} spendings={spendings} />
+            <CumulativeSpendCard dateRange={dateRange} setDateRange={setDateRange} spendings={spendings} />
           </Grid>
           <Grid item xs={12} md={6} lg={4} >
-            <TrendCard dateRange={dateRange} setDateRange={setDateRange} spendings={spendings} />
+            <CashflowCard dateRange={dateRange} setDateRange={setDateRange} spendings={spendings} />
+          </Grid>
+          <Grid item container spacing={2} xs={12} md={6} >
+            <Grid item xs={12}>
+              <CalendarCard dateRange={dateRange} spendings={spendings} />
+            </Grid>
+            <Grid item xs={12}>
+              <CalendarCard dateRange={dateRange} spendings={spendings} />
+            </Grid>
           </Grid>
           <Grid item xs={12} md={12} lg={6} >
             <TransactionsCard loading={loading} transactions={transactions} setCategoryFilter={setCategoryFilter} />
           </Grid>
         </Grid>
-        <Box position={"fixed"} bottom={30} right={30}>
+        <Box position={"fixed"} bottom={30} right={30} zIndex={2}>
           <Fab color="primary" onClick={onSyncClick} disabled={syncing}>
             <SyncIcon />
           </Fab>

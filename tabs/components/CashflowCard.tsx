@@ -1,11 +1,10 @@
-import { Box, Card, CardContent, CardHeader, GlobalStyles, IconButton, Modal, Paper, Tab, Tabs } from "@mui/material"
+import { Box, Card, CardContent, CardHeader, GlobalStyles, IconButton, Modal, Paper } from "@mui/material"
 import React, { useState } from "react";
 import EditIcon from '@mui/icons-material/Edit';
 import { DateRangePicker } from "mui-daterange-picker";
 import moment, { Moment } from "moment";
 import _ from 'lodash';
 import { DATE_FORMAT } from "~common/utils/constants";
-import { CumulativeSpendingChart } from "~tabs/components/CumulativeSpendingChart";
 import { CashflowChart } from "~tabs/components/CashflowChart";
 import { PlaidTransaction } from "~common/plaidTypes";
 
@@ -15,13 +14,12 @@ type DateRange = {
   label: string
 }
 
-export const TrendCard = (props: {
+export const CashflowCard = (props: {
   dateRange: DateRange,
   setDateRange: (range: typeof props.dateRange) => any
   spendings: PlaidTransaction[]
 }) => {
   const { dateRange, setDateRange, spendings } = props;
-  const [selectedTrendTab, setSelectedTrendTab] = useState<0 | 1>(0)
 
   const [open, setOpen] = useState(false);
   const toggle = () => setOpen(!open);
@@ -60,14 +58,7 @@ export const TrendCard = (props: {
         </Box>
       </Modal>
       <CardContent sx={{ height: "400px" }}>
-        <Box height={"330px"}>
-          {selectedTrendTab === 0 && <CumulativeSpendingChart transactions={spendings || []} fromDate={dateRange.startDate} toDate={dateRange.endDate} />}
-          {selectedTrendTab === 1 && <CashflowChart transactions={spendings || []} fromDate={dateRange.startDate} toDate={dateRange.endDate} />}
-        </Box>
-        <Tabs value={selectedTrendTab} onChange={(e, newValue) => setSelectedTrendTab(newValue)} variant="fullWidth">
-          <Tab label={"Cumulative Spend"} />
-          <Tab label={"Cashflow"} />
-        </Tabs>
+        <CashflowChart transactions={spendings || []} fromDate={dateRange.startDate} toDate={dateRange.endDate} />
       </CardContent>
     </Card>
   )
