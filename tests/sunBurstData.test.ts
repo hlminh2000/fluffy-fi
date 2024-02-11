@@ -23,14 +23,17 @@ const transactions: Parameters<typeof computeCategorySunburstData>[0] = [
 const expectedSunburstData: ReturnType<typeof computeCategorySunburstData> = {
   id: "root",
   value: 0,
+  fullPath: [],
   children: [
     {
       id: "Travel",
       value: 1,
+      fullPath: ["Travel"],
       children: [
         {
           id: "Taxi",
           value: 1,
+          fullPath: ["Travel", "Taxi"],
           children: []
         }
       ]
@@ -38,20 +41,24 @@ const expectedSunburstData: ReturnType<typeof computeCategorySunburstData> = {
     {
       id: "Food and Drink",
       value: 3,
+      fullPath: ["Food and Drink"],
       children: [
         {
           id: "Restaurant",
           value: 3,
+          fullPath: ["Food and Drink", "Restaurant"],
           children: [
             {
               id: "Fast Food",
               value: 1,
-              children: [],            
+              children: [],
+              fullPath: ["Food and Drink", "Restaurant", "Fast Food"],
             },
             {
               id: "Coffee Shops",
               value: 1,
               children: [],            
+              fullPath: ["Food and Drink", "Restaurant", "Coffee Shops"],
             },
           ]
         }

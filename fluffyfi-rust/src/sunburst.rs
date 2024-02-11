@@ -14,14 +14,13 @@ const TS_APPEND_CONTENT: &'static str = r#"
     full_path: string[]
   }
   export type PlaidTransactionFields = {
-    amount: f64,
-    category: Vec<String>,
+    amount: number,
+    category: string[],
   }
 
   export function get_category_sunburst_data(
     js_transactions: PlaidTransactionFields
   ): SunburstNode
-  export function get_category_sunburst_data(js_transactions: any): {} & null & undefined & void;
 "#;
 
 #[wasm_bindgen]
@@ -36,13 +35,13 @@ pub fn get_category_sunburst_data(
     return Ok(serde_wasm_bindgen::to_value(&something)?);
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 pub struct PlaidTransactionFields {
     amount: f64,
     category: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct SunburstNode<'a> {
     id: &'a str,
     value: f64,
