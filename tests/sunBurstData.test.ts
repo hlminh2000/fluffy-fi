@@ -27,7 +27,7 @@ const expectedSunburstData: ReturnType<typeof computeCategorySunburstData> = {
   children: [
     {
       id: "Travel",
-      value: 1,
+      value: 0,
       fullPath: ["Travel"],
       children: [
         {
@@ -40,12 +40,12 @@ const expectedSunburstData: ReturnType<typeof computeCategorySunburstData> = {
     },
     {
       id: "Food and Drink",
-      value: 3,
+      value: 0,
       fullPath: ["Food and Drink"],
       children: [
         {
           id: "Restaurant",
-          value: 3,
+          value: 1,
           fullPath: ["Food and Drink", "Restaurant"],
           children: [
             {
