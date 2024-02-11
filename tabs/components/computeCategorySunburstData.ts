@@ -23,7 +23,7 @@ const constructTree = (parent: SunburstNode, categoryChain: string[], transactio
     currentNode = { id: currentCategory, value: 0, children: [], transactions: [], fullPath: [...parent.fullPath, currentCategory] }
     parent.children?.push(currentNode)
   }
-  constructTree(currentNode, subCategoryChain, transaction)
+  return constructTree(currentNode, subCategoryChain, transaction)
 }
 
 const computeValue = (node: SunburstNode) => {
@@ -50,8 +50,9 @@ export const computeCategorySunburstData = (
   })
   tree.children.forEach(computeValue)
 
-  const targetNode = rootPath.slice(0, rootPath.length - 1).reduce((node: SunburstNode, edge: string) => node?.children?.find(c => c.id === edge), tree)
-  console.log("targetNode: ", targetNode)
+  const targetNode = rootPath
+    .slice(0, rootPath.length - 1)
+    .reduce((node: SunburstNode, edge: string) => node?.children?.find(c => c.id === edge), tree)
 
   return targetNode
 }

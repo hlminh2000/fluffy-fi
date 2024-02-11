@@ -1,7 +1,7 @@
 import { Autocomplete, Avatar, Box, Button, ButtonBase, Card, CardActions, CardContent, CardHeader, Chip, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, Modal, Skeleton, TextField, useTheme, } from "@mui/material"
 import { useAsync } from "react-async-hook";
 import { balanceDb } from "~common/PouchDbs";
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import EditIcon from '@mui/icons-material/Edit';
 import _, { groupBy } from 'lodash';
 import { DATE_FORMAT } from "~common/utils/constants";
@@ -121,13 +121,13 @@ export const TransactionsCard = (props: {
                           <ListItemText primary={doc.name} secondary={
                             <Box display="flex" alignItems="center" flexDirection="row">
                               {doc.category.map((c, i) => (
-                                <>
+                                <Fragment key={c}>
                                   {i > 0 && <ChevronRight />}
                                   <Chip label={c} size="small" component={ButtonBase} onClick={() => {
                                     const categoryFilter = doc.category.slice(0, i + 1)
                                     setCategoryFilter(categoryFilter)
                                   }} />
-                                </>
+                                </Fragment>
                               ))}
                             </Box>
                           } />

@@ -1,12 +1,12 @@
-import { AppBar, Box, Card, CardContent, CardHeader, Collapse, Container, Divider, Fab, Grid, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, SwipeableDrawer, TextField, Toolbar, useTheme } from "@mui/material"
+import { AppBar, Box, Card, CardContent, CardHeader, Container, Divider, Fab, Grid, IconButton, List, ListItemButton, ListItemIcon, ListItemText, SwipeableDrawer, Toolbar, useTheme } from "@mui/material"
 import { FluffyThemeProvider } from "~common/utils/theme"
 import { sendToBackground } from "@plasmohq/messaging";
 import { useAsync } from "react-async-hook";
 import { transactionDb, balanceDb } from "~common/PouchDbs";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import SyncIcon from '@mui/icons-material/Sync';
 import moment, { Moment } from "moment";
-import _, { groupBy, sumBy } from 'lodash';
+import _, { sumBy } from 'lodash';
 import { DATE_FORMAT } from "~common/utils/constants";
 import MenuIcon from '@mui/icons-material/Menu';
 import { PasswordGate } from "~common/components/PasswordGate";
@@ -18,8 +18,9 @@ import { TransactionsCard } from "./components/TransactionsCard";
 import { CashflowCard } from "./components/CashflowCard";
 import { ResponsiveCalendar } from '@nivo/calendar'
 import { PlaidTransaction } from "~common/plaidTypes";
-import { Category, Dashboard, Expand, ExpandLess, ExpandMore } from "@mui/icons-material";
-import ColorHash from "color-hash";
+import { Category, Dashboard } from "@mui/icons-material";
+import { CategoryTree } from "./components/CategoryTree";
+import initWasm, { add, get_category_sunburst_data } from '~fluffyfi-rust/pkg'
 
 type DateRange = {
   startDate: Moment,
@@ -49,9 +50,7 @@ const CalendarCard = (props: { spendings: PlaidTransaction[], dateRange: DateRan
           yearSpacing={40}
           monthBorderColor={theme.palette.grey[500]}
           dayBorderWidth={2}
-          // daySpacing={8}
           monthSpacing={8}
-          // dayBorderColor="#ffffff"
           legends={[
             {
               anchor: 'bottom-right',
@@ -69,48 +68,6 @@ const CalendarCard = (props: { spendings: PlaidTransaction[], dateRange: DateRan
     </Card>
   )
 }
-
-const CategoryTree = (props: { node: ReturnType<typeof useTransactionCategoryTree>["categoryTree"] }) => {
-  const { node } = props;
-  const [openChildren, setOpenChildren] = useState<Record<string, boolean>>({});
-
-  const toggleChildOpen = (childName: string) => () => setOpenChildren({
-    ...openChildren,
-    [childName]: !openChildren[childName]
-  })
-  
-
-  return (
-    <List sx={{ width: "100%" }}>
-      {node?.children.map(child => (
-        <Fragment key={child.name}>
-          <ListItemButton
-            onClick={toggleChildOpen(child.name)}
-          >
-            {/* <ListItemIcon>
-              <TextField value={new ColorHash().hex(child.name)} onClick={e => e.stopPropagation()} type="color" size="small" fullWidth sx={{ width: "47px" }} />
-            </ListItemIcon> */}
-            <ListItemText>{child.name}</ListItemText>
-            {
-              !!child.children.length && (
-                !openChildren[child.name] ? <ExpandMore /> : <ExpandLess />
-              )
-            }
-          </ListItemButton>
-          <Divider variant="inset"/>
-          {!!child.children.length && (
-            <Collapse in={!!openChildren[child.name]}>
-              <ListItem sx={{ ml: 2 }}>
-                <CategoryTree node={child} />
-              </ListItem>
-            </Collapse>
-          )}
-        </Fragment>
-      ))}
-    </List>
-  )
-}
-
 
 export default () => {
 
@@ -180,6 +137,17 @@ export default () => {
   const [currentView, setCurrentView] = useState<"dashboard" | "category">("category")
 
   const { categoryTree } = useTransactionCategoryTree();
+
+  useEffect(() => {
+    const init = async () => {
+      console.log("wasm: ", await initWasm())
+      console.log("wasm add: ", add(1, 2))
+      if (transactions) {
+        console.log("wasm add: ", get_category_sunburst_data(spendings))
+      }
+    }
+    init()
+  }, [transactions])
 
   return (
     <FluffyThemeProvider>
