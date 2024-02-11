@@ -2,7 +2,6 @@ extern crate itertools;
 extern crate console_error_panic_hook;
 
 use wasm_bindgen::prelude::*;
-use std::{panic};
 
 #[wasm_bindgen]
 extern "C" {

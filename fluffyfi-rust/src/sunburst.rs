@@ -19,18 +19,18 @@ const TS_APPEND_CONTENT: &'static str = r#"
   }
 
   export function get_category_sunburst_data(
-    jsTransactions: PlaidTransactionFields
+    js_transactions: PlaidTransactionFields
   ): SunburstNode
-  export function get_category_sunburst_data(jsTransactions: any): {} & null & undefined & void;
+  export function get_category_sunburst_data(js_transactions: any): {} & null & undefined & void;
 "#;
 
 #[wasm_bindgen]
 pub fn get_category_sunburst_data(
-    jsTransactions: JsValue
+    js_transactions: JsValue
 ) -> Result<JsValue, JsValue> {
     panic::set_hook(Box::new(console_error_panic_hook::hook));
 
-    let transactions: Vec<PlaidTransactionFields> = serde_wasm_bindgen::from_value(jsTransactions)?;
+    let transactions: Vec<PlaidTransactionFields> = serde_wasm_bindgen::from_value(js_transactions)?;
     let stuff = transactions.iter().map(|t| t).collect_vec();
     let something = construct_category_sunburst_data(stuff, 0, "root", vec![]);
     return Ok(serde_wasm_bindgen::to_value(&something)?);
