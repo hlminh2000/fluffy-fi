@@ -5,7 +5,7 @@
   "description": "The app to fluff up your personal finance",
   "author": "Minhified",
   "scripts": {
-    "build::wasm": "cd fluffyfi-rust && wasm-pack build --target web",
+    "build::wasm": "cd fluffyfi-rust && npx wasm-pack build --target web",
     "dev": "pnpm build::wasm && plasmo dev --verbose",
     "dev-ff": "pnpm build::wasm && plasmo dev --target=firefox-mv2 --verbose",
     "build": "pnpm build::wasm && plasmo build",
