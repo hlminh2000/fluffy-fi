@@ -5,10 +5,11 @@
   "description": "The app to fluff up your personal finance",
   "author": "Minhified",
   "scripts": {
-    "dev": "plasmo dev --verbose",
-    "dev-ff": "plasmo dev --target=firefox-mv2 --verbose",
-    "build": "plasmo build",
-    "build-ff": "plasmo build --target=firefox-mv2",
+    "build::wasm": "cd fluffyfi-rust && wasm-pack build --target web",
+    "dev": "pnpm build::wasm && plasmo dev --verbose",
+    "dev-ff": "pnpm build::wasm && plasmo dev --target=firefox-mv2 --verbose",
+    "build": "pnpm build::wasm && plasmo build",
+    "build-ff": "pnpm build::wasm && plasmo build --target=firefox-mv2",
     "test": "jest",
     "package": "plasmo package"
   },
