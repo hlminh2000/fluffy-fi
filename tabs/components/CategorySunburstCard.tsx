@@ -6,7 +6,6 @@ import { SunburstNode, computeCategorySunburstData } from "./computeCategorySunb
 import { dollarDisplay } from "~common/utils/displays"
 import { ChevronRight } from "@mui/icons-material"
 import { reverse, uniq } from "lodash"
-import ColorHash from "color-hash"
 import { colorHash } from "~common/utils/theme"
 
 type SunburstNodeWithColor = SunburstNode & { color: string, children: SunburstNodeWithColor []}
@@ -16,17 +15,6 @@ const sunburstNodeWithColor = (node: SunburstNode): SunburstNodeWithColor => ({
   color: "black",
   children: node.children.map(sunburstNodeWithColor)
 })
-
-const colorByCategory = async (category: string) => {
-  const colors = [
-    "#e8c1a0",
-    "#f47560",
-    "#f1e15b",
-    "#e8a838",
-    "#61cdbb",
-    "#97e3d5",
-  ];
-}
 
 const CategorySunburst = (props: { 
   transactions: PlaidTransaction[], 

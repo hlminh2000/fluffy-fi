@@ -20,7 +20,7 @@ import { ResponsiveCalendar } from '@nivo/calendar'
 import { PlaidTransaction } from "~common/plaidTypes";
 import { Category, Dashboard } from "@mui/icons-material";
 import { CategoryTree } from "./components/CategoryTree";
-import initWasm, { add, get_category_sunburst_data } from '~fluffyfi-rust/pkg'
+import { useFluffyfiWasm } from "~common/utils/useFluffyfiWasm";
 
 type DateRange = {
   startDate: Moment,
@@ -138,16 +138,13 @@ export default () => {
 
   const { categoryTree } = useTransactionCategoryTree();
 
+  const fluffWasm = useFluffyfiWasm();
+
   useEffect(() => {
-    const init = async () => {
-      console.log("wasm: ", await initWasm())
-      console.log("wasm add: ", add(1, 2))
-      if (transactions) {
-        console.log("wasm add: ", get_category_sunburst_data(spendings))
-      }
+    if (transactions && fluffWasm.initialized) {
+      console.log("wasm get_category_sunburst_data: ", fluffWasm.get_category_sunburst_data(spendings))
     }
-    init()
-  }, [transactions])
+  }, [transactions, fluffWasm.initialized])
 
   return (
     <FluffyThemeProvider>
