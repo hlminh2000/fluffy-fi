@@ -7,7 +7,7 @@ import { dollarDisplay } from "~common/utils/displays"
 import { ChevronRight } from "@mui/icons-material"
 import { reverse, uniq } from "lodash"
 import { colorHash } from "~common/utils/theme"
-import { useFluffyfiWasm } from "~common/utils/useFluffyfiWasm";
+// import { useFluffyfiWasm } from "~common/utils/useFluffyfiWasm";
 
 type SunburstNodeWithColor = SunburstNode & { color: string, children: SunburstNodeWithColor []}
 
