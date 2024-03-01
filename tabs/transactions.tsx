@@ -134,7 +134,7 @@ export default () => {
 
   const [drawerOpen, setDrawerOpen] = useState(false)
 
-  const [currentView, setCurrentView] = useState<"dashboard" | "category">("category")
+  const [currentView, setCurrentView] = useState<"dashboard" | "category">("dashboard")
 
   const { categoryTree } = useTransactionCategoryTree();
 

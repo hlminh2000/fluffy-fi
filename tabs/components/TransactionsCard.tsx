@@ -1,4 +1,5 @@
 import { Autocomplete, Avatar, Box, Button, ButtonBase, Card, CardActions, CardContent, CardHeader, Chip, Divider, IconButton, List, ListItem, ListItemIcon, ListItemText, Modal, Skeleton, TextField, useTheme, } from "@mui/material"
+import CategoryIcon from '@mui/icons-material/Category'; 
 import { useAsync } from "react-async-hook";
 import { balanceDb } from "~common/PouchDbs";
 import React, { Fragment, useEffect, useState } from "react";
@@ -19,7 +20,7 @@ const TransactionModal = (props: { transaction: PlaidTransaction | null, onClose
 
   const { result: account } = useAsync(async () => balanceDb.get(transaction?.account_id || ""), [transaction])
 
-  const changed = _.isEqual(transaction, temporaryData)
+  const changed = !_.isEqual(transaction, temporaryData)
 
   const onSave = async () => {
     if (temporaryData) {
@@ -38,11 +39,26 @@ const TransactionModal = (props: { transaction: PlaidTransaction | null, onClose
             <Divider />
             <CardContent>
               <List>
-                <ListItem secondaryAction={<TextField type="date" size="small" label={"Merchant"} value={temporaryData?.date} />}>
+                <ListItem secondaryAction={
+                  <TextField
+                    type="date"
+                    size="small"
+                    label={"Merchant"}
+                    value={temporaryData?.date}
+                    onChange={e => temporaryData && setTemporaryData({ ...temporaryData, date: e.target.value })}
+                  />
+                }>
                   <ListItemIcon><CalendarMonth color="primary" /></ListItemIcon>
                   <ListItemText>Date</ListItemText>
                 </ListItem>
-                <ListItem secondaryAction={<TextField size="small" label={"Name"} value={temporaryData?.name} />}>
+                <ListItem secondaryAction={
+                  <TextField
+                    size="small"
+                    label={"Name"}
+                    value={temporaryData?.name}
+                    onChange={e => temporaryData && setTemporaryData({ ...temporaryData, name: e.target.value })}
+                  />
+                }>
                   <ListItemIcon><Abc color="primary" /></ListItemIcon>
                   <ListItemText>Name</ListItemText>
                 </ListItem>
@@ -56,6 +72,10 @@ const TransactionModal = (props: { transaction: PlaidTransaction | null, onClose
                 }>
                   <ListItemIcon><Shop color="primary" /></ListItemIcon>
                   <ListItemText>Merchant</ListItemText>
+                </ListItem>
+                <ListItem>
+                  <ListItemIcon><CategoryIcon color="primary" /></ListItemIcon>
+                  <ListItemText>Category</ListItemText>
                 </ListItem>
               </List>
             </CardContent>
