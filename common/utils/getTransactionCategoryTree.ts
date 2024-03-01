@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { categoryDb } from "~common/PouchDbs";
 import { PlaidTransactionCategory } from "~common/plaidTypes";
 
-type CategoryTreeNode = {
+export type CategoryTreeNode = {
   name: string,
   path: string[],
   children: CategoryTreeNode[],

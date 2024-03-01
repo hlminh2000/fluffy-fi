@@ -1,9 +1,12 @@
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import { Collapse, Divider, List, ListItem, ListItemButton, ListItemText } from "@mui/material";
-import { Fragment, useState } from "react";
-import { useTransactionCategoryTree } from "~common/utils/getTransactionCategoryTree";
+import { Box, Button, Collapse, Divider, List, ListItem, ListItemButton, ListItemText, TextField } from "@mui/material";
+import React, { Fragment, useState } from "react";
+import { CategoryTreeNode, useTransactionCategoryTree } from "~common/utils/getTransactionCategoryTree";
 
-export const CategoryTree = (props: { node: ReturnType<typeof useTransactionCategoryTree>["categoryTree"] }) => {
+export const CategoryTree = (props: { 
+  node: ReturnType<typeof useTransactionCategoryTree>["categoryTree"] 
+  addSubCategory: (node: CategoryTreeNode, newCategoryName: string) => Promise<any>
+}) => {
   const { node } = props;
   const [openChildren, setOpenChildren] = useState<Record<string, boolean>>({});
 
@@ -11,7 +14,7 @@ export const CategoryTree = (props: { node: ReturnType<typeof useTransactionCate
     ...openChildren,
     [childName]: !openChildren[childName]
   })
-
+  const [newCategoryInputValues, setNewCategoryInputValues] = useState<{ [node: CategoryTreeNode['name']]: string | undefined}>({})
 
   return (
     <List sx={{ width: "100%" }}>
@@ -21,20 +24,36 @@ export const CategoryTree = (props: { node: ReturnType<typeof useTransactionCate
             onClick={toggleChildOpen(child.name)}
           >
             <ListItemText>{child.name}</ListItemText>
-            {
-              !!child.children.length && (
-                !openChildren[child.name] ? <ExpandMore /> : <ExpandLess />
-              )
-            }
+            { !openChildren[child.name] ? <ExpandMore /> : <ExpandLess /> }
           </ListItemButton>
-          <Divider />
-          {!!child.children.length && (
-            <Collapse in={!!openChildren[child.name]}>
-              <ListItem sx={{ ml: 2 }}>
-                <CategoryTree node={child} />
-              </ListItem>
-            </Collapse>
-          )}
+          <Divider variant="fullWidth" />
+          <Collapse in={!!openChildren[child.name]}>
+            <ListItem sx={{ ml: 2, display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+              <Box display={"flex"} flexDirection={"row"} gap={1} component={"form"} onSubmit={async e => {
+                e.preventDefault();
+                const value = newCategoryInputValues[child.name]
+                if (value) await props.addSubCategory(child, value);
+                setNewCategoryInputValues({
+                  ...newCategoryInputValues,
+                  [child.name]: undefined
+                })
+              }} >
+                <TextField
+                  label="New Category"
+                  variant="outlined"
+                  size="small"
+                  required
+                  value={newCategoryInputValues[child.name]}
+                  onChange={e => setNewCategoryInputValues({ 
+                    ...newCategoryInputValues, 
+                    [child.name]: e.target.value
+                  })}
+                />
+                <Button type="submit" size="small">Add</Button>
+              </Box>
+              <CategoryTree node={child} addSubCategory={props.addSubCategory} />
+            </ListItem>
+          </Collapse>
         </Fragment>
       ))}
     </List>

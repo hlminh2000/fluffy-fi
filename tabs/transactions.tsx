@@ -3,7 +3,7 @@ import { FluffyThemeProvider } from "~common/utils/theme"
 import { sendToBackground } from "@plasmohq/messaging";
 import { useAsync } from "react-async-hook";
 import { transactionDb, balanceDb } from "~common/PouchDbs";
-import React, { useEffect, useState } from "react";
+import React, { ComponentProps, useEffect, useState } from "react";
 import SyncIcon from '@mui/icons-material/Sync';
 import moment, { Moment } from "moment";
 import _, { sumBy } from 'lodash';
@@ -137,6 +137,9 @@ export default () => {
   const [currentView, setCurrentView] = useState<"dashboard" | "category">("dashboard")
 
   const { categoryTree } = useTransactionCategoryTree();
+  const addSubCategory: ComponentProps<typeof CategoryTree>['addSubCategory'] = async (node, newCategoryName) => {
+    console.log(node, newCategoryName)
+  }
 
   return (
     <FluffyThemeProvider>
@@ -221,7 +224,7 @@ export default () => {
                 <CardHeader title="Transaction Categories"/>
                 <Divider/>
                 <CardContent>
-                  <CategoryTree node={categoryTree} />
+                  <CategoryTree node={categoryTree} addSubCategory={addSubCategory} />
                 </CardContent>
               </Card>
             </Container>
