@@ -138,14 +138,6 @@ export default () => {
 
   const { categoryTree } = useTransactionCategoryTree();
 
-  const fluffWasm = useFluffyfiWasm();
-
-  useEffect(() => {
-    if (transactions && fluffWasm.initialized) {
-      console.log("wasm get_category_sunburst_data: ", fluffWasm.get_category_sunburst_data(spendings))
-    }
-  }, [transactions, fluffWasm.initialized])
-
   return (
     <FluffyThemeProvider>
       <PasswordGate>

@@ -1,12 +1,13 @@
 import { Box, Button, ButtonBase, Card, CardContent, CardHeader, Chip, Paper, Typography, useTheme } from "@mui/material"
 import { ResponsiveSunburst } from "@nivo/sunburst"
-import React, { ComponentProps } from "react"
+import React, { ComponentProps, useEffect } from "react"
 import { PlaidTransaction } from "~common/plaidTypes"
 import { SunburstNode, computeCategorySunburstData } from "./computeCategorySunburstData"
 import { dollarDisplay } from "~common/utils/displays"
 import { ChevronRight } from "@mui/icons-material"
 import { reverse, uniq } from "lodash"
 import { colorHash } from "~common/utils/theme"
+import { useFluffyfiWasm } from "~common/utils/useFluffyfiWasm";
 
 type SunburstNodeWithColor = SunburstNode & { color: string, children: SunburstNodeWithColor []}
 
@@ -28,6 +29,19 @@ const CategorySunburst = (props: {
   const sum = spendings.reduce((sum, t) => sum + t.amount, 0)
 
   const theme = useTheme();
+
+  // const fluffWasm = useFluffyfiWasm();
+  // useEffect(() => {
+  //   if (transactions && fluffWasm.initialized) {
+  //     const now = performance.now();
+  //     console.log("wasm get_category_sunburst_data: ", fluffWasm.get_category_sunburst_data(spendings))
+  //     console.log("rust: ", performance.now() - now);
+
+  //     const jsNow = performance.now();
+  //     console.log("js categorySunburstData: ", computeCategorySunburstData(spendings, props.rootPath))
+  //     console.log("js: ", performance.now() - jsNow);
+  //   }
+  // }, [transactions, fluffWasm.initialized])
 
   return (
     <Box height="100%" width="100%" position="relative">

@@ -30,7 +30,7 @@ pub fn get_category_sunburst_data(
     panic::set_hook(Box::new(console_error_panic_hook::hook));
 
     let transactions: Vec<PlaidTransactionFields> = serde_wasm_bindgen::from_value(js_transactions)?;
-    let stuff = transactions.iter().map(|t| t).collect_vec();
+    let stuff = transactions.iter().collect_vec();
     let something = construct_category_sunburst_data(stuff, 0, "root", vec![]);
     return Ok(serde_wasm_bindgen::to_value(&something)?);
 }
